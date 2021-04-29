@@ -17,7 +17,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/kralamoure/d1"
 	"github.com/kralamoure/d1/d1typ"
-	"github.com/kralamoure/d1encoding"
+	"github.com/kralamoure/d1proto"
 	"github.com/kralamoure/d1util"
 
 	"github.com/kralamoure/d1pg"
@@ -1592,14 +1592,14 @@ func encodeSpellLevel(level d1typ.SpellLevel) ([]interface{}, error) {
 
 	effectZones := make([]string, len(level.Effects)+len(level.EffectsCritical))
 	for i, effect := range level.Effects {
-		size, err := d1encoding.Encode64(effect.ZoneSize)
+		size, err := d1proto.Encode64(effect.ZoneSize)
 		if err != nil {
 			return nil, err
 		}
 		effectZones[i] = fmt.Sprintf("%s%s", string(effect.ZoneShape), string(size))
 	}
 	for i, effect := range level.EffectsCritical {
-		size, err := d1encoding.Encode64(effect.ZoneSize)
+		size, err := d1proto.Encode64(effect.ZoneSize)
 		if err != nil {
 			return nil, err
 		}
