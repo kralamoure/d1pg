@@ -7,7 +7,7 @@ import (
 
 	"github.com/kralamoure/d1"
 	"github.com/kralamoure/d1/d1typ"
-	"github.com/kralamoure/d1proto"
+	"github.com/kralamoure/d1encoding"
 )
 
 func (r *Repo) Spells(ctx context.Context) (spells map[int]d1.Spell, err error) {
@@ -174,7 +174,7 @@ func decodeSpellLevel(s string, grade int) (level d1typ.SpellLevel, err error) {
 			shape := d1typ.EffectZoneShape(effectZones[i*2])
 
 			sizeR := rune(effectZones[i*2+1])
-			size, err2 := d1proto.Decode64(sizeR)
+			size, err2 := d1encoding.Decode64(sizeR)
 			if err2 != nil {
 				err = err2
 				return
