@@ -10,5 +10,5 @@
 ## Installation
 
 ```sh
-go get -u -d -v https://github.com/kralamoure/d1pg
+go get -d -u -v https://github.com/kralamoure/d1pg
 ```
