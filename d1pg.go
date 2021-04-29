@@ -1,4 +1,4 @@
-// Package d1pg implements d1 repository interface for PostgreSQL.
+// Package d1pg is a library that implements d1.Repo interface (https://github.com/kralamoure/d1) for a PostgreSQL database.
 package d1pg
 
 import (
