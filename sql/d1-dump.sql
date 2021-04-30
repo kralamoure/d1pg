@@ -33,37 +33,35 @@ SET default_table_access_method = heap;
 -- Name: characters; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.characters
-(
-    id                 integer                             NOT NULL,
-    name               extensions.citext                   NOT NULL,
-    sex                integer                             NOT NULL,
-    class_id           integer                             NOT NULL,
-    color_1            text,
-    color_2            text,
-    color_3            text,
-    alignment          integer DEFAULT 0                   NOT NULL,
-    xp                 bigint  DEFAULT 0                   NOT NULL,
-    account_id         uuid                                NOT NULL,
-    gameserver_id      integer                             NOT NULL,
-    stats              text    DEFAULT '0,0,0,0,0,0'::text NOT NULL,
-    kamas              integer DEFAULT 0                   NOT NULL,
-    alignment_enabled  boolean DEFAULT false               NOT NULL,
-    bonus_points       integer DEFAULT 0                   NOT NULL,
-    bonus_points_spell integer DEFAULT 0                   NOT NULL,
-    honor              integer DEFAULT 0                   NOT NULL,
-    disgrace           integer DEFAULT 0                   NOT NULL,
-    map_id             integer                             NOT NULL,
-    direction          integer DEFAULT 1                   NOT NULL,
-    cell               integer                             NOT NULL,
-    spells             text[]  DEFAULT '{}'::text[]        NOT NULL,
-    mount_id           integer,
-    mounting           boolean DEFAULT false               NOT NULL
+CREATE TABLE d1.characters (
+                               id integer NOT NULL,
+                               name extensions.citext NOT NULL,
+                               sex integer NOT NULL,
+                               class_id integer NOT NULL,
+                               color_1 text,
+                               color_2 text,
+                               color_3 text,
+                               alignment integer DEFAULT 0 NOT NULL,
+                               xp bigint DEFAULT 0 NOT NULL,
+                               account_id uuid NOT NULL,
+                               gameserver_id integer NOT NULL,
+                               stats text DEFAULT '0,0,0,0,0,0'::text NOT NULL,
+                               kamas integer DEFAULT 0 NOT NULL,
+                               alignment_enabled boolean DEFAULT false NOT NULL,
+                               bonus_points integer DEFAULT 0 NOT NULL,
+                               bonus_points_spell integer DEFAULT 0 NOT NULL,
+                               honor integer DEFAULT 0 NOT NULL,
+                               disgrace integer DEFAULT 0 NOT NULL,
+                               map_id integer NOT NULL,
+                               direction integer DEFAULT 1 NOT NULL,
+                               cell integer NOT NULL,
+                               spells text[] DEFAULT '{}'::text[] NOT NULL,
+                               mount_id integer,
+                               mounting boolean DEFAULT false NOT NULL
 );
 
 
-ALTER TABLE d1.characters
-    OWNER TO postgres;
+ALTER TABLE d1.characters OWNER TO postgres;
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE; Schema: d1; Owner: postgres
@@ -78,8 +76,7 @@ CREATE SEQUENCE d1.characters_id_seq
     CACHE 1;
 
 
-ALTER TABLE d1.characters_id_seq
-    OWNER TO postgres;
+ALTER TABLE d1.characters_id_seq OWNER TO postgres;
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE OWNED BY; Schema: d1; Owner: postgres
@@ -92,36 +89,32 @@ ALTER SEQUENCE d1.characters_id_seq OWNED BY d1.characters.id;
 -- Name: characters_items; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.characters_items
-(
-    id           integer                  NOT NULL,
-    template_id  integer                  NOT NULL,
-    quantity     integer DEFAULT 1        NOT NULL,
-    effects      text    DEFAULT ''::text NOT NULL,
-    character_id integer                  NOT NULL,
-    "position"   integer
+CREATE TABLE d1.characters_items (
+                                     id integer NOT NULL,
+                                     template_id integer NOT NULL,
+                                     quantity integer DEFAULT 1 NOT NULL,
+                                     effects text DEFAULT ''::text NOT NULL,
+                                     character_id integer NOT NULL,
+                                     "position" integer
 );
 
 
-ALTER TABLE d1.characters_items
-    OWNER TO postgres;
+ALTER TABLE d1.characters_items OWNER TO postgres;
 
 --
 -- Name: gameservers; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.gameservers
-(
-    id         integer           NOT NULL,
-    host       extensions.citext NOT NULL,
-    port       extensions.citext NOT NULL,
-    state      integer DEFAULT 0 NOT NULL,
-    completion integer DEFAULT 0 NOT NULL
+CREATE TABLE d1.gameservers (
+                                id integer NOT NULL,
+                                host extensions.citext NOT NULL,
+                                port extensions.citext NOT NULL,
+                                state integer DEFAULT 0 NOT NULL,
+                                completion integer DEFAULT 0 NOT NULL
 );
 
 
-ALTER TABLE d1.gameservers
-    OWNER TO postgres;
+ALTER TABLE d1.gameservers OWNER TO postgres;
 
 --
 -- Name: items_id_seq; Type: SEQUENCE; Schema: d1; Owner: postgres
@@ -136,8 +129,7 @@ CREATE SEQUENCE d1.items_id_seq
     CACHE 1;
 
 
-ALTER TABLE d1.items_id_seq
-    OWNER TO postgres;
+ALTER TABLE d1.items_id_seq OWNER TO postgres;
 
 --
 -- Name: items_id_seq; Type: SEQUENCE OWNED BY; Schema: d1; Owner: postgres
@@ -150,19 +142,17 @@ ALTER SEQUENCE d1.items_id_seq OWNED BY d1.characters_items.id;
 -- Name: markets_items; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.markets_items
-(
-    id          integer                  NOT NULL,
-    template_id integer                  NOT NULL,
-    quantity    integer DEFAULT 1        NOT NULL,
-    effects     text    DEFAULT ''::text NOT NULL,
-    market_id   uuid                     NOT NULL,
-    price       integer                  NOT NULL
+CREATE TABLE d1.markets_items (
+                                  id integer NOT NULL,
+                                  template_id integer NOT NULL,
+                                  quantity integer DEFAULT 1 NOT NULL,
+                                  effects text DEFAULT ''::text NOT NULL,
+                                  market_id uuid NOT NULL,
+                                  price integer NOT NULL
 );
 
 
-ALTER TABLE d1.markets_items
-    OWNER TO postgres;
+ALTER TABLE d1.markets_items OWNER TO postgres;
 
 --
 -- Name: items_market_id_seq; Type: SEQUENCE; Schema: d1; Owner: postgres
@@ -176,8 +166,7 @@ CREATE SEQUENCE d1.items_market_id_seq
     CACHE 1;
 
 
-ALTER TABLE d1.items_market_id_seq
-    OWNER TO postgres;
+ALTER TABLE d1.items_market_id_seq OWNER TO postgres;
 
 --
 -- Name: items_market_id_seq; Type: SEQUENCE OWNED BY; Schema: d1; Owner: postgres
@@ -190,43 +179,39 @@ ALTER SEQUENCE d1.items_market_id_seq OWNED BY d1.markets_items.id;
 -- Name: markets; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.markets
-(
-    id              uuid    DEFAULT extensions.uuid_generate_v4() NOT NULL,
-    gameserver_id   integer                                       NOT NULL,
-    quantity_1      integer DEFAULT 1                             NOT NULL,
-    quantity_2      integer DEFAULT 10                            NOT NULL,
-    quantity_3      integer DEFAULT 100                           NOT NULL,
-    fee             real    DEFAULT 2.0                           NOT NULL,
-    types           text    DEFAULT ''::text                      NOT NULL,
-    max_level       integer DEFAULT 1000                          NOT NULL,
-    max_per_account integer DEFAULT 20                            NOT NULL,
-    max_hours       integer DEFAULT 350                           NOT NULL
+CREATE TABLE d1.markets (
+                            id uuid DEFAULT extensions.uuid_generate_v4() NOT NULL,
+                            gameserver_id integer NOT NULL,
+                            quantity_1 integer DEFAULT 1 NOT NULL,
+                            quantity_2 integer DEFAULT 10 NOT NULL,
+                            quantity_3 integer DEFAULT 100 NOT NULL,
+                            fee real DEFAULT 2.0 NOT NULL,
+                            types text DEFAULT ''::text NOT NULL,
+                            max_level integer DEFAULT 1000 NOT NULL,
+                            max_per_account integer DEFAULT 20 NOT NULL,
+                            max_hours integer DEFAULT 350 NOT NULL
 );
 
 
-ALTER TABLE d1.markets
-    OWNER TO postgres;
+ALTER TABLE d1.markets OWNER TO postgres;
 
 --
 -- Name: mounts; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.mounts
-(
-    id           integer                           NOT NULL,
-    character_id integer,
-    name         text      DEFAULT ''::text        NOT NULL,
-    xp           integer   DEFAULT 0               NOT NULL,
-    capacities   integer[] DEFAULT '{}'::integer[] NOT NULL,
-    template_id  integer                           NOT NULL,
-    sex          integer                           NOT NULL,
-    validity     timestamp with time zone
+CREATE TABLE d1.mounts (
+                           id integer NOT NULL,
+                           character_id integer,
+                           name text DEFAULT ''::text NOT NULL,
+                           xp integer DEFAULT 0 NOT NULL,
+                           capacities integer[] DEFAULT '{}'::integer[] NOT NULL,
+                           template_id integer NOT NULL,
+                           sex integer NOT NULL,
+                           validity timestamp with time zone
 );
 
 
-ALTER TABLE d1.mounts
-    OWNER TO postgres;
+ALTER TABLE d1.mounts OWNER TO postgres;
 
 --
 -- Name: mounts_id_seq; Type: SEQUENCE; Schema: d1; Owner: postgres
@@ -240,8 +225,7 @@ CREATE SEQUENCE d1.mounts_id_seq
     CACHE 1;
 
 
-ALTER TABLE d1.mounts_id_seq
-    OWNER TO postgres;
+ALTER TABLE d1.mounts_id_seq OWNER TO postgres;
 
 --
 -- Name: mounts_id_seq; Type: SEQUENCE OWNED BY; Schema: d1; Owner: postgres
@@ -254,87 +238,77 @@ ALTER SEQUENCE d1.mounts_id_seq OWNED BY d1.mounts.id;
 -- Name: npcs; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.npcs
-(
-    gameserver_id  integer                                       NOT NULL,
-    map_id         integer                                       NOT NULL,
-    cell_id        integer                                       NOT NULL,
-    direction      integer DEFAULT 1                             NOT NULL,
-    template_id    integer                                       NOT NULL,
-    gfx            integer                                       NOT NULL,
-    dialog_id      integer,
-    market_id      uuid,
-    id             uuid    DEFAULT extensions.uuid_generate_v4() NOT NULL,
-    sex            integer                                       NOT NULL,
-    scale_x        integer DEFAULT 100                           NOT NULL,
-    scale_y        integer DEFAULT 100                           NOT NULL,
-    color_1        text    DEFAULT ''::text                      NOT NULL,
-    color_2        text    DEFAULT ''::text                      NOT NULL,
-    color_3        text    DEFAULT ''::text                      NOT NULL,
-    extra_clip     integer,
-    custom_artwork integer,
-    accessories    text    DEFAULT ''::text                      NOT NULL
+CREATE TABLE d1.npcs (
+                         gameserver_id integer NOT NULL,
+                         map_id integer NOT NULL,
+                         cell_id integer NOT NULL,
+                         direction integer DEFAULT 1 NOT NULL,
+                         template_id integer NOT NULL,
+                         gfx integer NOT NULL,
+                         dialog_id integer,
+                         market_id uuid,
+                         id uuid DEFAULT extensions.uuid_generate_v4() NOT NULL,
+                         sex integer NOT NULL,
+                         scale_x integer DEFAULT 100 NOT NULL,
+                         scale_y integer DEFAULT 100 NOT NULL,
+                         color_1 text DEFAULT ''::text NOT NULL,
+                         color_2 text DEFAULT ''::text NOT NULL,
+                         color_3 text DEFAULT ''::text NOT NULL,
+                         extra_clip integer,
+                         custom_artwork integer,
+                         accessories text DEFAULT ''::text NOT NULL
 );
 
 
-ALTER TABLE d1.npcs
-    OWNER TO postgres;
+ALTER TABLE d1.npcs OWNER TO postgres;
 
 --
 -- Name: tickets; Type: TABLE; Schema: d1; Owner: postgres
 --
 
-CREATE TABLE d1.tickets
-(
-    id            uuid                     DEFAULT extensions.uuid_generate_v4() NOT NULL,
-    account_id    uuid                                                           NOT NULL,
-    gameserver_id integer                                                        NOT NULL,
-    created       timestamp with time zone DEFAULT CURRENT_TIMESTAMP             NOT NULL
+CREATE TABLE d1.tickets (
+                            id uuid DEFAULT extensions.uuid_generate_v4() NOT NULL,
+                            account_id uuid NOT NULL,
+                            gameserver_id integer NOT NULL,
+                            created timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
-ALTER TABLE d1.tickets
-    OWNER TO postgres;
+ALTER TABLE d1.tickets OWNER TO postgres;
 
 --
 -- Name: characters id; Type: DEFAULT; Schema: d1; Owner: postgres
 --
 
-ALTER TABLE ONLY d1.characters
-    ALTER COLUMN id SET DEFAULT nextval('d1.characters_id_seq'::regclass);
+ALTER TABLE ONLY d1.characters ALTER COLUMN id SET DEFAULT nextval('d1.characters_id_seq'::regclass);
 
 
 --
 -- Name: characters_items id; Type: DEFAULT; Schema: d1; Owner: postgres
 --
 
-ALTER TABLE ONLY d1.characters_items
-    ALTER COLUMN id SET DEFAULT nextval('d1.items_id_seq'::regclass);
+ALTER TABLE ONLY d1.characters_items ALTER COLUMN id SET DEFAULT nextval('d1.items_id_seq'::regclass);
 
 
 --
 -- Name: markets_items id; Type: DEFAULT; Schema: d1; Owner: postgres
 --
 
-ALTER TABLE ONLY d1.markets_items
-    ALTER COLUMN id SET DEFAULT nextval('d1.items_market_id_seq'::regclass);
+ALTER TABLE ONLY d1.markets_items ALTER COLUMN id SET DEFAULT nextval('d1.items_market_id_seq'::regclass);
 
 
 --
 -- Name: mounts id; Type: DEFAULT; Schema: d1; Owner: postgres
 --
 
-ALTER TABLE ONLY d1.mounts
-    ALTER COLUMN id SET DEFAULT nextval('d1.mounts_id_seq'::regclass);
+ALTER TABLE ONLY d1.mounts ALTER COLUMN id SET DEFAULT nextval('d1.mounts_id_seq'::regclass);
 
 
 --
 -- Data for Name: characters; Type: TABLE DATA; Schema: d1; Owner: postgres
 --
 
-COPY d1.characters (id, name, sex, class_id, color_1, color_2, color_3, alignment, xp, account_id, gameserver_id, stats,
-                    kamas, alignment_enabled, bonus_points, bonus_points_spell, honor, disgrace, map_id, direction,
-                    cell, spells, mount_id, mounting) FROM stdin;
+COPY d1.characters (id, name, sex, class_id, color_1, color_2, color_3, alignment, xp, account_id, gameserver_id, stats, kamas, alignment_enabled, bonus_points, bonus_points_spell, honor, disgrace, map_id, direction, cell, spells, mount_id, mounting) FROM stdin;
 35	Vile	0	6	3ae5a2	e5efbf	5f467f	0	0	42d18784-846d-4848-9a30-1b55f68f0076	2	101,101,101,101,101,101	100	f	0	1000	0	0	952	1	191	{412~5~4,370~5~5,373~5~6,391~5~7,368~5~8,350~5~9,369~5~10,366~5~11,364~5~12,367~5~13,394~5~14,390~5~0,392~5~0,393~5~0,395~5~0,396~5~0,397~5~0,102~5~1,103~5~2,105~5~3}	\N	f
 34	Wonder	0	4	17d36b	b34856	a8863a	0	157800000	42d18784-846d-4848-9a30-1b55f68f0076	2	101,101,200,101,101,254	40	f	2	1000	0	0	952	1	295	{416~6~4,370~6~5,373~6~6,391~6~7,368~6~8,350~6~9,369~6~10,366~6~11,364~6~12,367~6~13,394~6~14,390~6~0,392~6~0,393~6~0,395~6~0,396~6~0,397~6~0,72~6~1,61~6~2,65~6~3,66~6~0,68~6~0,63~6~0,74~6~0,64~5~0,79~5~0,78~5~0,71~5~0,62~5~0,69~5~0,77~5~0,73~5~0,67~5~0,70~5~0,75~5~0,76~5~0,80~5~0}	77	t
 36	Raul-Garrido	0	8	3778e0	0d0d0d	f4f4f5	0	7407232000	854d7f77-813d-450f-ae4c-f752d2e356ad	2	101,101,101,101,101,101	96	f	995	1000	0	0	952	1	310	{410~6~4,370~6~5,373~6~6,391~6~7,368~6~8,350~6~9,369~6~10,366~6~11,364~6~12,367~6~13,394~6~14,390~6~0,392~6~0,393~6~0,395~6~0,396~6~0,397~6~0,141~6~1,143~6~2,142~6~3,144~6~0,145~6~0,146~6~0,147~6~0,148~6~0,154~6~0,150~6~0,151~6~0,155~6~0,152~6~0,153~6~0,149~6~0,156~6~0,157~6~0,158~6~0,160~6~0,159~6~0,1908~6~0}	\N	f
@@ -592,8 +566,7 @@ COPY d1.gameservers (id, host, port, state, completion) FROM stdin;
 -- Data for Name: markets; Type: TABLE DATA; Schema: d1; Owner: postgres
 --
 
-COPY d1.markets (id, gameserver_id, quantity_1, quantity_2, quantity_3, fee, types, max_level, max_per_account,
-                 max_hours) FROM stdin;
+COPY d1.markets (id, gameserver_id, quantity_1, quantity_2, quantity_3, fee, types, max_level, max_per_account, max_hours) FROM stdin;
 f1c956f3-1486-4ffa-b29e-8925f4c77964	2	1	10	100	0	2,3,4,5,6,7,8,19	200	0	0
 31dbf930-0cfc-475e-989e-8c9ca171e1f3	2	1	10	100	0	16,17,81,1,9,10,11,6,5,19,7,8,22,21,4,3,2,20,82,23,18,42,94,97	200	0	0
 \.
@@ -13080,10 +13053,9 @@ COPY d1.mounts (id, character_id, name, xp, capacities, template_id, sex, validi
 -- Data for Name: npcs; Type: TABLE DATA; Schema: d1; Owner: postgres
 --
 
-COPY d1.npcs (gameserver_id, map_id, cell_id, direction, template_id, gfx, dialog_id, market_id, id, sex, scale_x,
-              scale_y, color_1, color_2, color_3, extra_clip, custom_artwork, accessories) FROM stdin;
-2	952	183	3	560	9073	2330	31dbf930-0cfc-475e-989e-8c9ca171e1f3	c98cc1a3-48b5-4a56-a87c-eb4d25e49ce5	0	100	100				\N	\N
-2	952	185	3	560	9073	2330	f1c956f3-1486-4ffa-b29e-8925f4c77964	18713433-9fc9-4a7a-bc24-7639221023ef	0	100	100				\N	\N
+COPY d1.npcs (gameserver_id, map_id, cell_id, direction, template_id, gfx, dialog_id, market_id, id, sex, scale_x, scale_y, color_1, color_2, color_3, extra_clip, custom_artwork, accessories) FROM stdin;
+2	952	183	3	560	9073	2330	31dbf930-0cfc-475e-989e-8c9ca171e1f3	c98cc1a3-48b5-4a56-a87c-eb4d25e49ce5	0	100	100				\N	\N	
+2	952	185	3	560	9073	2330	f1c956f3-1486-4ffa-b29e-8925f4c77964	18713433-9fc9-4a7a-bc24-7639221023ef	0	100	100				\N	\N	
 \.
 
 
@@ -13238,7 +13210,7 @@ CREATE INDEX mounts_character_id_idx ON d1.mounts USING btree (character_id);
 --
 
 ALTER TABLE ONLY d1.characters
-    ADD CONSTRAINT characters_account_id_fkey FOREIGN KEY (account_id) REFERENCES dofus.accounts (id);
+    ADD CONSTRAINT characters_account_id_fkey FOREIGN KEY (account_id) REFERENCES dofus.accounts(id);
 
 
 --
@@ -13246,7 +13218,7 @@ ALTER TABLE ONLY d1.characters
 --
 
 ALTER TABLE ONLY d1.characters
-    ADD CONSTRAINT characters_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers (id);
+    ADD CONSTRAINT characters_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers(id);
 
 
 --
@@ -13254,7 +13226,7 @@ ALTER TABLE ONLY d1.characters
 --
 
 ALTER TABLE ONLY d1.characters
-    ADD CONSTRAINT characters_map_id_fkey FOREIGN KEY (map_id) REFERENCES d1_static.maps (id);
+    ADD CONSTRAINT characters_map_id_fkey FOREIGN KEY (map_id) REFERENCES d1_static.maps(id);
 
 
 --
@@ -13262,7 +13234,7 @@ ALTER TABLE ONLY d1.characters
 --
 
 ALTER TABLE ONLY d1.characters
-    ADD CONSTRAINT characters_mount_id_fkey FOREIGN KEY (mount_id) REFERENCES d1.mounts (id);
+    ADD CONSTRAINT characters_mount_id_fkey FOREIGN KEY (mount_id) REFERENCES d1.mounts(id);
 
 
 --
@@ -13270,7 +13242,7 @@ ALTER TABLE ONLY d1.characters
 --
 
 ALTER TABLE ONLY d1.characters_items
-    ADD CONSTRAINT items_character_character_id_fkey FOREIGN KEY (character_id) REFERENCES d1.characters (id) ON DELETE CASCADE;
+    ADD CONSTRAINT items_character_character_id_fkey FOREIGN KEY (character_id) REFERENCES d1.characters(id) ON DELETE CASCADE;
 
 
 --
@@ -13278,7 +13250,7 @@ ALTER TABLE ONLY d1.characters_items
 --
 
 ALTER TABLE ONLY d1.characters_items
-    ADD CONSTRAINT items_character_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.items (id);
+    ADD CONSTRAINT items_character_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.items(id);
 
 
 --
@@ -13286,7 +13258,7 @@ ALTER TABLE ONLY d1.characters_items
 --
 
 ALTER TABLE ONLY d1.markets_items
-    ADD CONSTRAINT items_market_market_id_fkey FOREIGN KEY (market_id) REFERENCES d1.markets (id);
+    ADD CONSTRAINT items_market_market_id_fkey FOREIGN KEY (market_id) REFERENCES d1.markets(id);
 
 
 --
@@ -13294,7 +13266,7 @@ ALTER TABLE ONLY d1.markets_items
 --
 
 ALTER TABLE ONLY d1.markets_items
-    ADD CONSTRAINT items_market_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.items (id);
+    ADD CONSTRAINT items_market_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.items(id);
 
 
 --
@@ -13302,7 +13274,7 @@ ALTER TABLE ONLY d1.markets_items
 --
 
 ALTER TABLE ONLY d1.markets
-    ADD CONSTRAINT markets_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers (id);
+    ADD CONSTRAINT markets_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers(id);
 
 
 --
@@ -13310,7 +13282,7 @@ ALTER TABLE ONLY d1.markets
 --
 
 ALTER TABLE ONLY d1.mounts
-    ADD CONSTRAINT mounts_character_id_fkey FOREIGN KEY (character_id) REFERENCES d1.characters (id) ON DELETE CASCADE;
+    ADD CONSTRAINT mounts_character_id_fkey FOREIGN KEY (character_id) REFERENCES d1.characters(id) ON DELETE CASCADE;
 
 
 --
@@ -13318,7 +13290,7 @@ ALTER TABLE ONLY d1.mounts
 --
 
 ALTER TABLE ONLY d1.mounts
-    ADD CONSTRAINT mounts_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.mounts (id);
+    ADD CONSTRAINT mounts_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.mounts(id);
 
 
 --
@@ -13326,7 +13298,7 @@ ALTER TABLE ONLY d1.mounts
 --
 
 ALTER TABLE ONLY d1.npcs
-    ADD CONSTRAINT npcs_dialog_id_fkey FOREIGN KEY (dialog_id) REFERENCES d1_static.npc_dialogs (id);
+    ADD CONSTRAINT npcs_dialog_id_fkey FOREIGN KEY (dialog_id) REFERENCES d1_static.npc_dialogs(id);
 
 
 --
@@ -13334,7 +13306,7 @@ ALTER TABLE ONLY d1.npcs
 --
 
 ALTER TABLE ONLY d1.npcs
-    ADD CONSTRAINT npcs_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers (id);
+    ADD CONSTRAINT npcs_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers(id);
 
 
 --
@@ -13342,7 +13314,7 @@ ALTER TABLE ONLY d1.npcs
 --
 
 ALTER TABLE ONLY d1.npcs
-    ADD CONSTRAINT npcs_map_id_fkey FOREIGN KEY (map_id) REFERENCES d1_static.maps (id);
+    ADD CONSTRAINT npcs_map_id_fkey FOREIGN KEY (map_id) REFERENCES d1_static.maps(id);
 
 
 --
@@ -13350,7 +13322,7 @@ ALTER TABLE ONLY d1.npcs
 --
 
 ALTER TABLE ONLY d1.npcs
-    ADD CONSTRAINT npcs_market_id_fkey FOREIGN KEY (market_id) REFERENCES d1.markets (id);
+    ADD CONSTRAINT npcs_market_id_fkey FOREIGN KEY (market_id) REFERENCES d1.markets(id);
 
 
 --
@@ -13358,7 +13330,7 @@ ALTER TABLE ONLY d1.npcs
 --
 
 ALTER TABLE ONLY d1.npcs
-    ADD CONSTRAINT npcs_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.npcs (id);
+    ADD CONSTRAINT npcs_template_id_fkey FOREIGN KEY (template_id) REFERENCES d1_static.npcs(id);
 
 
 --
@@ -13366,7 +13338,7 @@ ALTER TABLE ONLY d1.npcs
 --
 
 ALTER TABLE ONLY d1.tickets
-    ADD CONSTRAINT tickets_account_id_fkey FOREIGN KEY (account_id) REFERENCES dofus.accounts (id);
+    ADD CONSTRAINT tickets_account_id_fkey FOREIGN KEY (account_id) REFERENCES dofus.accounts(id);
 
 
 --
@@ -13374,7 +13346,7 @@ ALTER TABLE ONLY d1.tickets
 --
 
 ALTER TABLE ONLY d1.tickets
-    ADD CONSTRAINT tickets_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers (id);
+    ADD CONSTRAINT tickets_gameserver_id_fkey FOREIGN KEY (gameserver_id) REFERENCES d1.gameservers(id);
 
 
 --
