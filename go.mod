@@ -1,4 +1,4 @@
-module github.com/kralamoure/d1pg
+module github.com/kralamoure/retropg
 
 go 1.16
 
@@ -7,9 +7,10 @@ require (
 	github.com/jackc/pgconn v1.8.1
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/jackc/pgx/v4 v4.11.0
-	github.com/kralamoure/d1 v0.0.0-20210429214140-311f664cc574
-	github.com/kralamoure/d1proto v0.0.0-20210429214219-2bb2fe67cc88
-	github.com/kralamoure/d1util v0.0.0-20210428040002-6c1bdddc6ce1
+	github.com/kralamoure/retro v0.0.0-20210518143642-3f411d09afcf
+	github.com/kralamoure/retroproto v0.0.0-20210518145930-3b4548159c85
+	github.com/kralamoure/retroutil v0.0.0-20210518132922-a957c67f4004
 	github.com/lib/pq v1.7.0 // indirect
+	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
 	golang.org/x/text v0.3.6 // indirect
 )

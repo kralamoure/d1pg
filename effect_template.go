@@ -1,12 +1,12 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) EffectTemplates(ctx context.Context) (templates map[int]d1.EffectTemplate, err error) {
+func (r *Storer) EffectTemplates(ctx context.Context) (templates map[int]retro.EffectTemplate, err error) {
 	query := "SELECT id, description, dice, operator, characteristic_id, element" +
 		" FROM d1_static.effects;"
 
@@ -16,9 +16,9 @@ func (r *Repo) EffectTemplates(ctx context.Context) (templates map[int]d1.Effect
 	}
 	defer rows.Close()
 
-	templates = make(map[int]d1.EffectTemplate)
+	templates = make(map[int]retro.EffectTemplate)
 	for rows.Next() {
-		var t d1.EffectTemplate
+		var t retro.EffectTemplate
 		err = rows.Scan(&t.Id, &t.Description, &t.Dice, &t.Operator, &t.CharacteristicId, &t.Element)
 		if err != nil {
 			return

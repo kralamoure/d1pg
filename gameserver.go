@@ -1,24 +1,24 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) CreateGameServer(ctx context.Context, gameServer d1.GameServer) error {
-	query := "INSERT INTO d1.gameservers (id, host, port, state, completion)" +
+func (r *Storer) CreateGameServer(ctx context.Context, gameServer retro.GameServer) error {
+	query := "INSERT INTO retro.gameservers (id, host, port, state, completion)" +
 		" VALUES ($1, $2, $3, $4, $5);"
 
 	_, err := r.pool.Exec(ctx, query,
 		gameServer.Id, gameServer.Host, gameServer.Port, gameServer.State, gameServer.Completion)
-	return repoError(err)
+	return storerError(err)
 }
 
-func (r *Repo) GameServers(ctx context.Context) (gameServers map[int]d1.GameServer, err error) {
+func (r *Storer) GameServers(ctx context.Context) (gameServers map[int]retro.GameServer, err error) {
 	query := "SELECT id, host, port, state, completion" +
-		" FROM d1.gameservers;"
+		" FROM retro.gameservers;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
@@ -26,9 +26,9 @@ func (r *Repo) GameServers(ctx context.Context) (gameServers map[int]d1.GameServ
 	}
 	defer rows.Close()
 
-	gameServers = make(map[int]d1.GameServer)
+	gameServers = make(map[int]retro.GameServer)
 	for rows.Next() {
-		var gameServer d1.GameServer
+		var gameServer retro.GameServer
 		err = rows.Scan(&gameServer.Id, &gameServer.Host, &gameServer.Port, &gameServer.State, &gameServer.Completion)
 		if err != nil {
 			return
@@ -38,20 +38,20 @@ func (r *Repo) GameServers(ctx context.Context) (gameServers map[int]d1.GameServ
 	return
 }
 
-func (r *Repo) GameServer(ctx context.Context, id int) (gameServer d1.GameServer, err error) {
+func (r *Storer) GameServer(ctx context.Context, id int) (gameServer retro.GameServer, err error) {
 	query := "SELECT id, host, port, state, completion" +
-		" FROM d1.gameservers" +
+		" FROM retro.gameservers" +
 		" WHERE id = $1;"
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query, id).
 			Scan(&gameServer.Id, &gameServer.Host, &gameServer.Port, &gameServer.State, &gameServer.Completion),
 	)
 	return
 }
 
-func (r *Repo) SetGameServerState(ctx context.Context, id int, state d1typ.GameServerState) error {
-	query := "UPDATE d1.gameservers" +
+func (r *Storer) SetGameServerState(ctx context.Context, id int, state retrotyp.GameServerState) error {
+	query := "UPDATE retro.gameservers" +
 		" SET state = $2" +
 		" WHERE id = $1;"
 
@@ -60,7 +60,7 @@ func (r *Repo) SetGameServerState(ctx context.Context, id int, state d1typ.GameS
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 	return nil
 }

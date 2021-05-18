@@ -1,4 +1,4 @@
-package d1pg
+package retropg
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
 const (
@@ -15,13 +15,13 @@ const (
 
 type errCode string
 
-func repoError(err error) error {
+func storerError(err error) error {
 	if err == nil {
 		return nil
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%w: %s", d1.ErrNotFound, err)
+		return fmt.Errorf("%w: %s", retro.ErrNotFound, err)
 	}
 
 	pgErr, ok := err.(*pgconn.PgError)
@@ -33,17 +33,17 @@ func repoError(err error) error {
 		return err
 	}
 
-	var repoErr error
+	var storerErr error
 	switch pgErr.ConstraintName {
 	case "gameservers_host_port_key":
-		repoErr = d1.ErrGameServerHostAndPortAlreadyExist
+		storerErr = retro.ErrGameServerHostAndPortAlreadyExist
 	case "characters_name_gameserver_id_key":
-		repoErr = d1.ErrCharacterNameAndGameServerIdAlreadyExist
+		storerErr = retro.ErrCharacterNameAndGameServerIdAlreadyExist
 	case "tickets_account_id_key":
-		repoErr = d1.ErrTicketAccountIdAlreadyExists
+		storerErr = retro.ErrTicketAccountIdAlreadyExists
 	default:
-		repoErr = d1.ErrAlreadyExists
+		storerErr = retro.ErrAlreadyExists
 	}
 
-	return fmt.Errorf("%w: %s", repoErr, err)
+	return fmt.Errorf("%w: %s", storerErr, err)
 }

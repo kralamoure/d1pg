@@ -1,12 +1,12 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) NPCDialogs(ctx context.Context) (dialogs map[int]d1.NPCDialog, err error) {
+func (r *Storer) NPCDialogs(ctx context.Context) (dialogs map[int]retro.NPCDialog, err error) {
 	query := "SELECT id, text, responses" +
 		" FROM d1_static.npc_dialogs;"
 
@@ -16,9 +16,9 @@ func (r *Repo) NPCDialogs(ctx context.Context) (dialogs map[int]d1.NPCDialog, er
 	}
 	defer rows.Close()
 
-	dialogs = make(map[int]d1.NPCDialog)
+	dialogs = make(map[int]retro.NPCDialog)
 	for rows.Next() {
-		var dialog d1.NPCDialog
+		var dialog retro.NPCDialog
 		err = rows.Scan(&dialog.Id, &dialog.Text, &dialog.Responses)
 		if err != nil {
 			return

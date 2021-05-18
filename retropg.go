@@ -1,5 +1,5 @@
-// Package d1pg is a library that implements d1.Repo interface (https://github.com/kralamoure/d1) for a PostgreSQL database.
-package d1pg
+// Package retropg is a library that implements retro.Storer interface (https://github.com/kralamoure/retro) for a PostgreSQL database.
+package retropg
 
 import (
 	"errors"
@@ -16,16 +16,16 @@ var defaultTxOptions = pgx.TxOptions{
 
 var errInvalidAssertion = errors.New("invalid assertion")
 
-type Repo struct {
+type Storer struct {
 	pool *pgxpool.Pool
 }
 
-func NewRepo(pool *pgxpool.Pool) (*Repo, error) {
+func NewStorer(pool *pgxpool.Pool) (*Storer, error) {
 	if pool == nil {
 		return nil, errors.New("pool is nil")
 	}
 
-	login := &Repo{pool: pool}
+	login := &Storer{pool: pool}
 
 	return login, nil
 }

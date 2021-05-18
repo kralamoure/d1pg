@@ -1,14 +1,14 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) NPCs(ctx context.Context, gameServerId int) (npcs map[string]d1.NPC, err error) {
+func (r *Storer) NPCs(ctx context.Context, gameServerId int) (npcs map[string]retro.NPC, err error) {
 	query := "SELECT id, gameserver_id, map_id, cell_id, direction, template_id, sex, gfx, scale_x, scale_y, color_1, color_2, color_3, accessories, extra_clip, custom_artwork, dialog_id, market_id" +
-		" FROM d1.npcs" +
+		" FROM retro.npcs" +
 		" WHERE gameserver_id = $1;"
 
 	rows, err := r.pool.Query(ctx, query, gameServerId)
@@ -17,9 +17,9 @@ func (r *Repo) NPCs(ctx context.Context, gameServerId int) (npcs map[string]d1.N
 	}
 	defer rows.Close()
 
-	npcs = make(map[string]d1.NPC)
+	npcs = make(map[string]retro.NPC)
 	for rows.Next() {
-		var npc d1.NPC
+		var npc retro.NPC
 		var dialogId *int
 		var marketId *string
 		var extraClip *int

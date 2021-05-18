@@ -1,27 +1,27 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) CreateCharacterItem(ctx context.Context, item d1.CharacterItem) (id int, err error) {
-	query := "INSERT INTO d1.characters_items (template_id, quantity, effects, position, character_id)" +
+func (r *Storer) CreateCharacterItem(ctx context.Context, item retro.CharacterItem) (id int, err error) {
+	query := "INSERT INTO retro.characters_items (template_id, quantity, effects, position, character_id)" +
 		" VALUES ($1, $2, $3, $4, $5)" +
 		" RETURNING id;"
 
-	effects := d1.EncodeItemEffects(item.Effects)
+	effects := retro.EncodeItemEffects(item.Effects)
 
-	var position *d1typ.CharacterItemPosition
+	var position *retrotyp.CharacterItemPosition
 	if item.Position != -1 {
 		position = &item.Position
 	}
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query,
 			item.TemplateId, item.Quantity, strings.Join(effects, ","), position, item.CharacterId,
 		).Scan(&id),
@@ -29,14 +29,14 @@ func (r *Repo) CreateCharacterItem(ctx context.Context, item d1.CharacterItem) (
 	return
 }
 
-func (r *Repo) UpdateCharacterItem(ctx context.Context, item d1.CharacterItem) error {
-	query := "UPDATE d1.characters_items" +
+func (r *Storer) UpdateCharacterItem(ctx context.Context, item retro.CharacterItem) error {
+	query := "UPDATE retro.characters_items" +
 		" SET template_id = $2, quantity = $3, effects = $4, position = $5, character_id = $6" +
 		" WHERE id = $1;"
 
-	effects := d1.EncodeItemEffects(item.Effects)
+	effects := retro.EncodeItemEffects(item.Effects)
 
-	var position *d1typ.CharacterItemPosition
+	var position *retrotyp.CharacterItemPosition
 	if item.Position != -1 {
 		position = &item.Position
 	}
@@ -47,14 +47,14 @@ func (r *Repo) UpdateCharacterItem(ctx context.Context, item d1.CharacterItem) e
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *Repo) DeleteCharacterItem(ctx context.Context, id int) error {
-	query := "DELETE FROM d1.characters_items" +
+func (r *Storer) DeleteCharacterItem(ctx context.Context, id int) error {
+	query := "DELETE FROM retro.characters_items" +
 		" WHERE id = $1;"
 
 	tag, err := r.pool.Exec(ctx, query, id)
@@ -62,17 +62,17 @@ func (r *Repo) DeleteCharacterItem(ctx context.Context, id int) error {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 	return nil
 }
 
-func (r *Repo) CharacterItemsByCharacterId(ctx context.Context, characterId int) (items map[int]d1.CharacterItem, err error) {
+func (r *Storer) CharacterItemsByCharacterId(ctx context.Context, characterId int) (items map[int]retro.CharacterItem, err error) {
 	return r.characterItems(ctx, "character_id = $1", characterId)
 }
 
-func (r *Repo) CharacterItem(ctx context.Context, id int) (d1.CharacterItem, error) {
-	var item d1.CharacterItem
+func (r *Storer) CharacterItem(ctx context.Context, id int) (retro.CharacterItem, error) {
+	var item retro.CharacterItem
 
 	items, err := r.characterItems(ctx, "id = $1", id)
 	if err != nil {
@@ -80,7 +80,7 @@ func (r *Repo) CharacterItem(ctx context.Context, id int) (d1.CharacterItem, err
 	}
 
 	if len(items) != 1 {
-		return item, d1.ErrNotFound
+		return item, retro.ErrNotFound
 	}
 
 	for k := range items {
@@ -90,9 +90,9 @@ func (r *Repo) CharacterItem(ctx context.Context, id int) (d1.CharacterItem, err
 	return item, nil
 }
 
-func (r *Repo) characterItems(ctx context.Context, conditions string, args ...interface{}) (map[int]d1.CharacterItem, error) {
+func (r *Storer) characterItems(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.CharacterItem, error) {
 	query := "SELECT id, template_id, quantity, effects, position, character_id" +
-		" FROM d1.characters_items"
+		" FROM retro.characters_items"
 	if conditions != "" {
 		query += fmt.Sprintf(" WHERE %s", conditions)
 	}
@@ -104,11 +104,11 @@ func (r *Repo) characterItems(ctx context.Context, conditions string, args ...in
 	}
 	defer rows.Close()
 
-	items := make(map[int]d1.CharacterItem)
+	items := make(map[int]retro.CharacterItem)
 	for rows.Next() {
-		var item d1.CharacterItem
+		var item retro.CharacterItem
 		var effectsStr string
-		var position *d1typ.CharacterItemPosition
+		var position *retrotyp.CharacterItemPosition
 
 		err = rows.Scan(&item.Id, &item.TemplateId, &item.Quantity, &effectsStr, &position, &item.CharacterId)
 		if err != nil {
@@ -116,7 +116,7 @@ func (r *Repo) characterItems(ctx context.Context, conditions string, args ...in
 		}
 
 		if effectsStr != "" {
-			effects, err := d1.DecodeItemEffects(strings.Split(effectsStr, ","))
+			effects, err := retro.DecodeItemEffects(strings.Split(effectsStr, ","))
 			if err != nil {
 				return nil, err
 			}

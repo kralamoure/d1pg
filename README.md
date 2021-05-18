@@ -1,6 +1,7 @@
-# d1pg
+# retropg
 
-`d1pg` is a library that implements [d1.Repo](https://github.com/kralamoure/d1) interface for a PostgreSQL database.
+`retropg` is a library that implements [retro.Storer](https://github.com/kralamoure/retro) interface for a PostgreSQL
+database.
 
 ## Requirements
 
@@ -10,5 +11,5 @@
 ## Installation
 
 ```sh
-go get -d -u -v https://github.com/kralamoure/d1pg
+go get -d -u -v https://github.com/kralamoure/retropg
 ```

@@ -1,4 +1,4 @@
-package d1pg
+package retropg
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) ItemSets(ctx context.Context) (itemSets map[int]d1.ItemSet, err error) {
+func (r *Storer) ItemSets(ctx context.Context) (itemSets map[int]retro.ItemSet, err error) {
 	query := "SELECT id, name, bonus" +
 		" FROM d1_static.itemsets;"
 
@@ -20,9 +20,9 @@ func (r *Repo) ItemSets(ctx context.Context) (itemSets map[int]d1.ItemSet, err e
 	}
 	defer rows.Close()
 
-	itemSets = make(map[int]d1.ItemSet)
+	itemSets = make(map[int]retro.ItemSet)
 	for rows.Next() {
-		var itemSet d1.ItemSet
+		var itemSet retro.ItemSet
 		var bonus string
 		err = rows.Scan(&itemSet.Id, &itemSet.Name, &bonus)
 		if err != nil {
@@ -30,13 +30,13 @@ func (r *Repo) ItemSets(ctx context.Context) (itemSets map[int]d1.ItemSet, err e
 		}
 
 		sli := strings.Split(bonus, ";")
-		itemSet.Bonus = make([][]d1typ.Effect, len(sli))
+		itemSet.Bonus = make([][]retrotyp.Effect, len(sli))
 		for i, v := range sli {
 			if v == "" {
 				continue
 			}
 			stats := strings.Split(v, ",")
-			itemSet.Bonus[i] = make([]d1typ.Effect, len(stats))
+			itemSet.Bonus[i] = make([]retrotyp.Effect, len(stats))
 			for i2, v := range stats {
 				effectStr := strings.Split(v, ":")
 				if len(effectStr) != 2 {
@@ -53,9 +53,9 @@ func (r *Repo) ItemSets(ctx context.Context) (itemSets map[int]d1.ItemSet, err e
 					err = err2
 					return
 				}
-				itemSet.Bonus[i][i2] = d1typ.Effect{
+				itemSet.Bonus[i][i2] = retrotyp.Effect{
 					Id:        id,
-					ZoneShape: d1typ.EffectZoneShapeCircle,
+					ZoneShape: retrotyp.EffectZoneShapeCircle,
 					DiceNum:   diceNum,
 					Hidden:    true,
 				}

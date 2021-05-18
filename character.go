@@ -1,4 +1,4 @@
-package d1pg
+package retropg
 
 import (
 	"context"
@@ -7,24 +7,24 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) CreateCharacter(ctx context.Context, character d1.Character) (id int, err error) {
-	query := "INSERT INTO d1.characters (account_id, gameserver_id, name, sex, class_id, color_1, color_2, color_3, alignment, alignment_enabled, xp, kamas, bonus_points, bonus_points_spell, honor, disgrace, stats, map_id, cell, direction, spells, mount_id, mounting)" +
+func (r *Storer) CreateCharacter(ctx context.Context, character retro.Character) (id int, err error) {
+	query := "INSERT INTO retro.characters (account_id, gameserver_id, name, sex, class_id, color_1, color_2, color_3, alignment, alignment_enabled, xp, kamas, bonus_points, bonus_points_spell, honor, disgrace, stats, map_id, cell, direction, spells, mount_id, mounting)" +
 		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)" +
 		" RETURNING id;"
 
-	var color1 *d1typ.Color
+	var color1 *retrotyp.Color
 	if character.Color1 != "" {
 		color1 = &character.Color1
 	}
-	var color2 *d1typ.Color
+	var color2 *retrotyp.Color
 	if character.Color1 != "" {
 		color2 = &character.Color2
 	}
-	var color3 *d1typ.Color
+	var color3 *retrotyp.Color
 	if character.Color1 != "" {
 		color3 = &character.Color3
 	}
@@ -48,7 +48,7 @@ func (r *Repo) CreateCharacter(ctx context.Context, character d1.Character) (id 
 		mountId = &character.MountId
 	}
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query,
 			character.AccountId, character.GameServerId, character.Name, character.Sex, character.ClassId,
 			color1, color2, color3, character.Alignment, character.AlignmentEnabled, character.XP, character.Kamas,
@@ -59,20 +59,20 @@ func (r *Repo) CreateCharacter(ctx context.Context, character d1.Character) (id 
 	return
 }
 
-func (r *Repo) UpdateCharacter(ctx context.Context, character d1.Character) error {
-	query := "UPDATE d1.characters" +
+func (r *Storer) UpdateCharacter(ctx context.Context, character retro.Character) error {
+	query := "UPDATE retro.characters" +
 		" SET account_id = $2, gameserver_id = $3, name = $4, sex = $5, class_id = $6, color_1 = $7, color_2 = $8, color_3 = $9, alignment = $10, alignment_enabled = $11, xp = $12, kamas = $13, bonus_points = $14, bonus_points_spell = $15, honor = $16, disgrace = $17, stats = $18, map_id = $19, cell = $20, direction = $21, spells = $22, mount_id = $23, mounting = $24" +
 		" WHERE id = $1;"
 
-	var color1 *d1typ.Color
+	var color1 *retrotyp.Color
 	if character.Color1 != "" {
 		color1 = &character.Color1
 	}
-	var color2 *d1typ.Color
+	var color2 *retrotyp.Color
 	if character.Color1 != "" {
 		color2 = &character.Color2
 	}
-	var color3 *d1typ.Color
+	var color3 *retrotyp.Color
 	if character.Color1 != "" {
 		color3 = &character.Color3
 	}
@@ -105,14 +105,14 @@ func (r *Repo) UpdateCharacter(ctx context.Context, character d1.Character) erro
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *Repo) DeleteCharacter(ctx context.Context, id int) error {
-	query := "DELETE FROM d1.characters" +
+func (r *Storer) DeleteCharacter(ctx context.Context, id int) error {
+	query := "DELETE FROM retro.characters" +
 		" WHERE id = $1;"
 
 	tag, err := r.pool.Exec(ctx, query, id)
@@ -120,33 +120,33 @@ func (r *Repo) DeleteCharacter(ctx context.Context, id int) error {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 	return nil
 }
 
-func (r *Repo) AllCharacters(ctx context.Context) (map[int]d1.Character, error) {
+func (r *Storer) AllCharacters(ctx context.Context) (map[int]retro.Character, error) {
 	return r.characters(ctx, "")
 }
 
-func (r *Repo) AllCharactersByAccountId(ctx context.Context, accountId string) (map[int]d1.Character, error) {
+func (r *Storer) AllCharactersByAccountId(ctx context.Context, accountId string) (map[int]retro.Character, error) {
 	return r.characters(ctx, "account_id = $1;", accountId)
 }
 
-func (r *Repo) Characters(ctx context.Context, gameServerId int) (map[int]d1.Character, error) {
+func (r *Storer) Characters(ctx context.Context, gameServerId int) (map[int]retro.Character, error) {
 	return r.characters(ctx, "gameserver_id = $1", gameServerId)
 }
 
-func (r *Repo) CharactersByAccountId(ctx context.Context, gameServerId int, accountId string) (map[int]d1.Character, error) {
+func (r *Storer) CharactersByAccountId(ctx context.Context, gameServerId int, accountId string) (map[int]retro.Character, error) {
 	return r.characters(ctx, "gameserver_id = $1 AND account_id = $2", gameServerId, accountId)
 }
 
-func (r *Repo) CharactersByGameMapId(ctx context.Context, gameServerId int, gameMapId int) (map[int]d1.Character, error) {
+func (r *Storer) CharactersByGameMapId(ctx context.Context, gameServerId int, gameMapId int) (map[int]retro.Character, error) {
 	return r.characters(ctx, "gameserver_id = $1 AND map_id = $2", gameServerId, gameMapId)
 }
 
-func (r *Repo) Character(ctx context.Context, id int) (d1.Character, error) {
-	var char d1.Character
+func (r *Storer) Character(ctx context.Context, id int) (retro.Character, error) {
+	var char retro.Character
 
 	chars, err := r.characters(ctx, "id = $1", id)
 	if err != nil {
@@ -154,7 +154,7 @@ func (r *Repo) Character(ctx context.Context, id int) (d1.Character, error) {
 	}
 
 	if len(chars) != 1 {
-		return char, d1.ErrNotFound
+		return char, retro.ErrNotFound
 	}
 
 	for k := range chars {
@@ -164,9 +164,9 @@ func (r *Repo) Character(ctx context.Context, id int) (d1.Character, error) {
 	return char, nil
 }
 
-func (r *Repo) characters(ctx context.Context, conditions string, args ...interface{}) (map[int]d1.Character, error) {
+func (r *Storer) characters(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.Character, error) {
 	query := "SELECT id, account_id, gameserver_id, name, sex, class_id, color_1, color_2, color_3, alignment, alignment_enabled, xp, kamas, bonus_points, bonus_points_spell, honor, disgrace, stats, map_id, cell, direction, spells, mount_id, mounting" +
-		" FROM d1.characters"
+		" FROM retro.characters"
 	if conditions != "" {
 		query += fmt.Sprintf(" WHERE %s", conditions)
 	}
@@ -178,12 +178,12 @@ func (r *Repo) characters(ctx context.Context, conditions string, args ...interf
 	}
 	defer rows.Close()
 
-	characters := make(map[int]d1.Character)
+	characters := make(map[int]retro.Character)
 	for rows.Next() {
-		var character d1.Character
-		var color1 *d1typ.Color
-		var color2 *d1typ.Color
-		var color3 *d1typ.Color
+		var character retro.Character
+		var color1 *retrotyp.Color
+		var color2 *retrotyp.Color
+		var color3 *retrotyp.Color
 		var statsStr string
 		var spellsSli []string
 		var mountId *int
@@ -229,8 +229,8 @@ func (r *Repo) characters(ctx context.Context, conditions string, args ...interf
 	return characters, nil
 }
 
-func characterStats(s string) (d1.CharacterStats, error) {
-	var stats d1.CharacterStats
+func characterStats(s string) (retro.CharacterStats, error) {
+	var stats retro.CharacterStats
 
 	sli := strings.Split(s, ",")
 	if len(sli) < 6 {
@@ -276,10 +276,10 @@ func characterStats(s string) (d1.CharacterStats, error) {
 	return stats, nil
 }
 
-func characterSpells(sli []string) ([]d1.CharacterSpell, error) {
-	spells := make([]d1.CharacterSpell, len(sli))
+func characterSpells(sli []string) ([]retro.CharacterSpell, error) {
+	spells := make([]retro.CharacterSpell, len(sli))
 	for i, v := range sli {
-		var spell d1.CharacterSpell
+		var spell retro.CharacterSpell
 
 		sli := strings.Split(v, "~")
 		if len(sli) != 3 {

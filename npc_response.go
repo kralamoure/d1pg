@@ -1,12 +1,12 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) NPCResponses(ctx context.Context) (responses map[int]d1.NPCResponse, err error) {
+func (r *Storer) NPCResponses(ctx context.Context) (responses map[int]retro.NPCResponse, err error) {
 	query := "SELECT id, text, action, arguments, conditions" +
 		" FROM d1_static.npc_responses;"
 
@@ -16,9 +16,9 @@ func (r *Repo) NPCResponses(ctx context.Context) (responses map[int]d1.NPCRespon
 	}
 	defer rows.Close()
 
-	responses = make(map[int]d1.NPCResponse)
+	responses = make(map[int]retro.NPCResponse)
 	for rows.Next() {
-		var response d1.NPCResponse
+		var response retro.NPCResponse
 		err = rows.Scan(&response.Id, &response.Text, &response.Action, &response.Arguments, &response.Conditions)
 		if err != nil {
 			return

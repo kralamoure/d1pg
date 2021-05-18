@@ -1,20 +1,20 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"time"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) CreateTicket(ctx context.Context, ticket d1.Ticket) (id string, err error) {
-	query := "INSERT INTO d1.tickets (account_id, gameserver_id)" +
+func (r *Storer) CreateTicket(ctx context.Context, ticket retro.Ticket) (id string, err error) {
+	query := "INSERT INTO retro.tickets (account_id, gameserver_id)" +
 		" VALUES ($1, $2)" +
 		" ON CONFLICT (account_id) DO UPDATE" +
 		" SET id = DEFAULT, gameserver_id = EXCLUDED.gameserver_id, created = DEFAULT" +
 		" RETURNING id;"
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query,
 			ticket.AccountId, ticket.GameServerId).
 			Scan(&id),
@@ -22,8 +22,8 @@ func (r *Repo) CreateTicket(ctx context.Context, ticket d1.Ticket) (id string, e
 	return
 }
 
-func (r *Repo) DeleteTickets(ctx context.Context, before time.Time) (count int, err error) {
-	query := "DELETE FROM d1.tickets" +
+func (r *Storer) DeleteTickets(ctx context.Context, before time.Time) (count int, err error) {
+	query := "DELETE FROM retro.tickets" +
 		" WHERE created <= $1;"
 
 	tag, err := r.pool.Exec(ctx, query, before)
@@ -34,21 +34,21 @@ func (r *Repo) DeleteTickets(ctx context.Context, before time.Time) (count int, 
 	return
 }
 
-func (r *Repo) UseTicket(ctx context.Context, id string) (ticket d1.Ticket, err error) {
-	query := "DELETE FROM d1.tickets" +
+func (r *Storer) UseTicket(ctx context.Context, id string) (ticket retro.Ticket, err error) {
+	query := "DELETE FROM retro.tickets" +
 		" WHERE id = $1" +
 		" RETURNING id, account_id, gameserver_id, created;"
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query, id).
 			Scan(&ticket.Id, &ticket.AccountId, &ticket.GameServerId, &ticket.Created),
 	)
 	return
 }
 
-func (r *Repo) Tickets(ctx context.Context) (tickets map[string]d1.Ticket, err error) {
+func (r *Storer) Tickets(ctx context.Context) (tickets map[string]retro.Ticket, err error) {
 	query := "SELECT id, account_id, gameserver_id, created" +
-		" FROM d1.tickets;"
+		" FROM retro.tickets;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
@@ -56,9 +56,9 @@ func (r *Repo) Tickets(ctx context.Context) (tickets map[string]d1.Ticket, err e
 	}
 	defer rows.Close()
 
-	tickets = make(map[string]d1.Ticket)
+	tickets = make(map[string]retro.Ticket)
 	for rows.Next() {
-		var ticket d1.Ticket
+		var ticket retro.Ticket
 		err = rows.Scan(&ticket.Id, &ticket.AccountId, &ticket.GameServerId, &ticket.Created)
 		if err != nil {
 			return
@@ -68,12 +68,12 @@ func (r *Repo) Tickets(ctx context.Context) (tickets map[string]d1.Ticket, err e
 	return
 }
 
-func (r *Repo) Ticket(ctx context.Context, id string) (ticket d1.Ticket, err error) {
+func (r *Storer) Ticket(ctx context.Context, id string) (ticket retro.Ticket, err error) {
 	query := "SELECT id, account_id, gameserver_id, created" +
-		" FROM d1.tickets" +
+		" FROM retro.tickets" +
 		" WHERE id = $1;"
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query, id).
 			Scan(&ticket.Id, &ticket.AccountId, &ticket.GameServerId, &ticket.Created),
 	)

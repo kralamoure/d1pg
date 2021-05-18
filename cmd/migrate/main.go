@@ -15,20 +15,19 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
-	"github.com/kralamoure/d1proto"
-	"github.com/kralamoure/d1util"
-
-	"github.com/kralamoure/d1pg"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
+	"github.com/kralamoure/retropg"
+	"github.com/kralamoure/retroproto"
+	"github.com/kralamoure/retroutil"
 )
 
 var errInvalidAssertion = errors.New("invalid assertion")
 
 var (
-	ctx  = context.Background()
-	pool *pgxpool.Pool
-	repo *d1pg.Repo
+	ctx    = context.Background()
+	pool   *pgxpool.Pool
+	storer *retropg.Storer
 )
 
 type ItemTemplate struct {
@@ -114,7 +113,7 @@ func run() error {
 	pool = tmp
 	defer pool.Close()
 
-	repo, err = d1pg.NewRepo(pool)
+	storer, err = retropg.NewStorer(pool)
 	if err != nil {
 		return err
 	}
@@ -181,7 +180,7 @@ func createMountTemplates() error {
 			color3 = fmt.Sprintf("%x", color3N)
 		}
 
-		query := "INSERT INTO d1_static.mounts (id, name, gfx_id, color_1, color_2, color_3)" +
+		query := "INSERT INTO retro_static.mounts (id, name, gfx_id, color_1, color_2, color_3)" +
 			" VALUES ($1, $2, $3, $4, $5, $6);"
 
 		_, err = pool.Exec(ctx, query,
@@ -258,7 +257,7 @@ func createSpells() error {
 			levels = append(levels, string(p))
 		}
 
-		query := "INSERT INTO d1_static.spells (id, name, description, levels)" +
+		query := "INSERT INTO retro_static.spells (id, name, description, levels)" +
 			" VALUES ($1, $2, $3, $4);"
 
 		_, err = pool.Exec(ctx, query,
@@ -310,7 +309,7 @@ func createClasses() error {
 			return err
 		}
 
-		query := "INSERT INTO d1_static.classes (id, name, label, short_description, description, spells, boost_costs)" +
+		query := "INSERT INTO retro_static.classes (id, name, label, short_description, description, spells, boost_costs)" +
 			" VALUES ($1, $2, $3, $4, $5, $6, $7);"
 
 		_, err = pool.Exec(ctx, query,
@@ -337,7 +336,7 @@ func createSystemMarketWeaponElements() error {
 		if i == 1 {
 			marketId = etherealMarketId
 		}
-		marketItems, err := repo.MarketItemsByMarketId(ctx, marketId)
+		marketItems, err := storer.MarketItemsByMarketId(ctx, marketId)
 		if err != nil {
 			return err
 		}
@@ -360,7 +359,7 @@ func createSystemMarketWeaponElements() error {
 				}
 
 				for _, elementId := range elementIds {
-					effects := make([]d1typ.Effect, len(v.Effects))
+					effects := make([]retrotyp.Effect, len(v.Effects))
 
 					changed := false
 					for i, effect := range v.Effects {
@@ -377,14 +376,14 @@ func createSystemMarketWeaponElements() error {
 								effect.DiceSide = 0
 							}
 
-							effect.Param = d1.EffectDiceParam(effect)
+							effect.Param = retro.EffectDiceParam(effect)
 						}
 						effects[i] = effect
 					}
 
 					if changed {
-						_, err := repo.CreateMarketItem(ctx, d1.MarketItem{
-							Item: d1.Item{
+						_, err := storer.CreateMarketItem(ctx, retro.MarketItem{
+							Item: retro.Item{
 								TemplateId: v.TemplateId,
 								Quantity:   1,
 								Effects:    effects,
@@ -411,7 +410,7 @@ func createSystemMarketItems() error {
 	effectIdsToRemove := []int{205, 208, 209, 601, 740, 785, 983, 800, 806, 807, 808, 811}
 	disallowedItemIds := []int{9031, 9202, 9919, 9396, 6894, 6895, 7913, 7920, 2154, 2155, 2156, 6713, 8575, 8854, 10076, 10073, 9627, 2170, 8627, 1505, 6971, 6975, 8574, 7043, 7112, 8098, 10125, 10126, 10127, 10133, 1944, 1628, 1629, 1630, 1631, 1632, 1633, 684, 1710, 958, 1099, 10846, 10677, 9641, 9635, 9472, 8952, 8949, 992, 991, 990, 989, 7865, 7864, 7809, 7807, 7806}
 
-	markets, err := repo.Markets(ctx, gameServerId)
+	markets, err := storer.Markets(ctx, gameServerId)
 	if err != nil {
 		return err
 	}
@@ -424,13 +423,13 @@ func createSystemMarketItems() error {
 		return errors.New("ethereal market not found")
 	}
 
-	effectTemplates, err := repo.EffectTemplates(ctx)
+	effectTemplates, err := storer.EffectTemplates(ctx)
 	if err != nil {
 		return err
 	}
 
 	for i := 0; i < 2; i++ {
-		itemTemplates, err := repo.ItemTemplates(ctx)
+		itemTemplates, err := storer.ItemTemplates(ctx)
 		if err != nil {
 			return err
 		}
@@ -440,7 +439,7 @@ func createSystemMarketItems() error {
 			market = etherealMarket
 		}
 
-		var items []d1.MarketItem
+		var items []retro.MarketItem
 
 	itemTemplates:
 		for k, v := range itemTemplates {
@@ -471,12 +470,12 @@ func createSystemMarketItems() error {
 				(strings.Contains(v.Name, "Master ") && strings.Contains(v.Name, "Shield")) ||
 				strings.Contains(v.Conditions, "Ps=3") ||
 				strings.Contains(v.Conditions, "BI=") ||
-				(v.Type == d1typ.ItemTypeCandy && !strings.Contains(v.Name, "Shigekax")) ||
-				(v.Type == d1typ.ItemTypeUsableItem && !(v.Id == 7799 || v.Id == 8626)) {
+				(v.Type == retrotyp.ItemTypeCandy && !strings.Contains(v.Name, "Shigekax")) ||
+				(v.Type == retrotyp.ItemTypeUsableItem && !(v.Id == 7799 || v.Id == 8626)) {
 				continue
 			}
 
-			var effects []d1typ.Effect
+			var effects []retrotyp.Effect
 		effects:
 			for _, effect := range v.Effects {
 				// Shushumi weapon
@@ -492,13 +491,13 @@ func createSystemMarketItems() error {
 
 				t := effectTemplates[effect.Id]
 				if t.Dice && effect.DiceSide > 0 {
-					if t.Operator == d1typ.EffectOperatorAdd {
+					if t.Operator == retrotyp.EffectOperatorAdd {
 						effect.DiceNum = effect.DiceSide
 						effect.DiceSide = 0
-						effect.Param = d1.EffectDiceParam(effect)
-					} else if t.Operator == d1typ.EffectOperatorSub {
+						effect.Param = retro.EffectDiceParam(effect)
+					} else if t.Operator == retrotyp.EffectOperatorSub {
 						effect.DiceSide = 0
-						effect.Param = d1.EffectDiceParam(effect)
+						effect.Param = retro.EffectDiceParam(effect)
 					}
 				}
 
@@ -511,25 +510,25 @@ func createSystemMarketItems() error {
 				effects = append(effects, effect)
 			}
 
-			if v.Type == d1typ.ItemTypePet {
-				var petItems []d1.MarketItem
+			if v.Type == retrotyp.ItemTypePet {
+				var petItems []retro.MarketItem
 
 				// pets with multiple variable stats
 				if v.Id == 8154 || v.Id == 7891 || v.Id == 7714 || v.Id == 7520 || v.Id == 2074 || v.Id == 2075 || v.Id == 2076 || v.Id == 2077 || v.Id == 1748 || v.Id == 1728 {
 					for _, effect := range effects {
-						petItems = append(petItems, d1.MarketItem{
-							Item: d1.Item{
+						petItems = append(petItems, retro.MarketItem{
+							Item: retro.Item{
 								TemplateId: v.Id,
 								Quantity:   1,
-								Effects:    []d1typ.Effect{effect},
+								Effects:    []retrotyp.Effect{effect},
 							},
 							Price:    1,
 							MarketId: market.Id,
 						})
 					}
 				} else {
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
 							Effects:    effects,
@@ -541,11 +540,11 @@ func createSystemMarketItems() error {
 
 				// El Scarador and Croum
 				if v.Id == 8154 || v.Id == 7520 {
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      214,
 									DiceNum: 6,
@@ -571,11 +570,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      214,
 									DiceNum: 13,
@@ -589,11 +588,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      214,
 									DiceNum: 13,
@@ -607,11 +606,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      214,
 									DiceNum: 13,
@@ -625,11 +624,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      214,
 									DiceNum: 13,
@@ -643,11 +642,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      210,
 									DiceNum: 13,
@@ -661,11 +660,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      210,
 									DiceNum: 13,
@@ -679,11 +678,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      210,
 									DiceNum: 13,
@@ -697,11 +696,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      213,
 									DiceNum: 13,
@@ -715,11 +714,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      213,
 									DiceNum: 13,
@@ -733,11 +732,11 @@ func createSystemMarketItems() error {
 						Price:    1,
 						MarketId: market.Id,
 					})
-					petItems = append(petItems, d1.MarketItem{
-						Item: d1.Item{
+					petItems = append(petItems, retro.MarketItem{
+						Item: retro.Item{
 							TemplateId: v.Id,
 							Quantity:   1,
-							Effects: []d1typ.Effect{
+							Effects: []retrotyp.Effect{
 								{
 									Id:      211,
 									DiceNum: 13,
@@ -755,7 +754,7 @@ func createSystemMarketItems() error {
 
 				for _, item := range petItems {
 					if v.Id != 7523 && v.Id != 6895 && v.Id != 6894 && v.Id != 6718 && v.Id != 6717 {
-						otherPetEffects := []d1typ.Effect{
+						otherPetEffects := []retrotyp.Effect{
 							{
 								Id:       800,
 								DiceNum:  0,
@@ -765,7 +764,7 @@ func createSystemMarketItems() error {
 						}
 
 						if v.Id != 6604 && v.Id != 1711 {
-							otherPetEffects = append(otherPetEffects, d1typ.Effect{
+							otherPetEffects = append(otherPetEffects, retrotyp.Effect{
 								Id:       940,
 								DiceNum:  0,
 								DiceSide: 0,
@@ -778,8 +777,8 @@ func createSystemMarketItems() error {
 					items = append(items, item)
 				}
 			} else {
-				items = append(items, d1.MarketItem{
-					Item: d1.Item{
+				items = append(items, retro.MarketItem{
+					Item: retro.Item{
 						TemplateId: v.Id,
 						Quantity:   1,
 						Effects:    effects,
@@ -791,7 +790,7 @@ func createSystemMarketItems() error {
 		}
 
 		for _, item := range items {
-			_, err := repo.CreateMarketItem(ctx, item)
+			_, err := storer.CreateMarketItem(ctx, item)
 			if err != nil {
 				return err
 			}
@@ -826,7 +825,7 @@ func createEffectTemplates() error {
 			return err
 		}
 
-		query := "INSERT INTO d1_static.effects (id, description, dice, operator, characteristic, element)" +
+		query := "INSERT INTO retro_static.effects (id, description, dice, operator, characteristic, element)" +
 			" VALUES ($1, $2, $3, $4, $5, $6);"
 
 		_, err = pool.Exec(ctx, query, id, v.Description, v.Dice, v.Operator, v.Characteristic, v.Element)
@@ -860,7 +859,7 @@ func createNPCDialogsAndResponses() error {
 			return err
 		}
 
-		query := "INSERT INTO d1_static.npc_dialogs (id, text)" +
+		query := "INSERT INTO retro_static.npc_dialogs (id, text)" +
 			" VALUES ($1, $2);"
 
 		_, err = pool.Exec(ctx, query, id, v)
@@ -875,7 +874,7 @@ func createNPCDialogsAndResponses() error {
 			return err
 		}
 
-		query := "INSERT INTO d1_static.npc_responses (id, text)" +
+		query := "INSERT INTO retro_static.npc_responses (id, text)" +
 			" VALUES ($1, $2);"
 
 		_, err = pool.Exec(ctx, query, id, v)
@@ -888,18 +887,18 @@ func createNPCDialogsAndResponses() error {
 }
 
 func decryptGameMapData() error {
-	gameMaps, err := repo.GameMaps(ctx)
+	gameMaps, err := storer.GameMaps(ctx)
 	if err != nil {
 		return err
 	}
 	for _, gameMap := range gameMaps {
-		data, err := d1util.DecipherGameMap(gameMap.EncryptedData, gameMap.Key)
+		data, err := retroutil.DecipherGameMap(gameMap.EncryptedData, gameMap.Key)
 		if err != nil {
 			return err
 		}
 		gameMap.Data = data
 
-		query := "UPDATE d1_static.maps" +
+		query := "UPDATE retro_static.maps" +
 			" SET data = $2" +
 			" WHERE id = $1;"
 
@@ -913,7 +912,7 @@ func decryptGameMapData() error {
 }
 
 func orderItemTemplateEffects() error {
-	itemTemplates, err := repo.ItemTemplates(ctx)
+	itemTemplates, err := storer.ItemTemplates(ctx)
 	if err != nil {
 		return err
 	}
@@ -1066,9 +1065,9 @@ func orderItemTemplateEffects() error {
 			return ix < ix2
 		})
 
-		effects := d1.EncodeItemEffects(v.Effects)
+		effects := retro.EncodeItemEffects(v.Effects)
 
-		query := "UPDATE d1_static.items" +
+		query := "UPDATE retro_static.items" +
 			" SET effects = $2" +
 			" WHERE id = $1;"
 
@@ -1082,7 +1081,7 @@ func orderItemTemplateEffects() error {
 }
 
 func orderItemSetEffects() error {
-	itemSets, err := repo.ItemSets(ctx)
+	itemSets, err := storer.ItemSets(ctx)
 	if err != nil {
 		return err
 	}
@@ -1246,7 +1245,7 @@ func orderItemSetEffects() error {
 			bonus[i] = strings.Join(effectsStr, ",")
 		}
 
-		query := "UPDATE d1_static.itemsets" +
+		query := "UPDATE retro_static.itemsets" +
 			" SET bonus = $2" +
 			" WHERE id = $1;"
 
@@ -1278,7 +1277,7 @@ func updateItemTemplateTexts() error {
 			return err
 		}
 
-		query := "UPDATE d1_static.items" +
+		query := "UPDATE retro_static.items" +
 			" SET name = $2, description = $3" +
 			" WHERE id = $1;"
 
@@ -1316,7 +1315,7 @@ func updateItemTemplateEffects() error {
 			return err
 		}
 
-		query := "UPDATE d1_static.itemts" +
+		query := "UPDATE retro_static.itemts" +
 			" SET effects = $2" +
 			" WHERE id = $1;"
 
@@ -1348,11 +1347,11 @@ func createItemTemplates() error {
 			return err
 		}
 
-		itemTemplate := d1.ItemTemplate{
+		itemTemplate := retro.ItemTemplate{
 			Id:            id,
 			Name:          v.Name,
 			Description:   v.Description,
-			Type:          d1typ.ItemType(v.Type),
+			Type:          retrotyp.ItemType(v.Type),
 			Enhanceable:   v.Enhanceable,
 			TwoHands:      v.TwoHands,
 			Ethereal:      v.Ethereal,
@@ -1366,7 +1365,7 @@ func createItemTemplates() error {
 			Weight:        v.Weight,
 			Cursed:        v.Cursed,
 			Conditions:    v.Conditions,
-			WeaponEffects: d1.WeaponEffects{},
+			WeaponEffects: retro.WeaponEffects{},
 		}
 
 		var weaponEffects string
@@ -1429,7 +1428,7 @@ func createItemTemplates() error {
 			)
 		}
 
-		query := "INSERT INTO d1_static.items (id, name, description, type, enhanceable, two_hands, ethereal, hidden, itemset_id, can_use, can_target, level, gfx, price, weight, cursed, conditions, weapon_effects, effects)" +
+		query := "INSERT INTO retro_static.items (id, name, description, type, enhanceable, two_hands, ethereal, hidden, itemset_id, can_use, can_target, level, gfx, price, weight, cursed, conditions, weapon_effects, effects)" +
 			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);"
 
 		_, err = pool.Exec(ctx, query,
@@ -1469,7 +1468,7 @@ func addTargetIdToSpells() error {
 		})
 	}
 
-	spells, err := repo.Spells(ctx)
+	spells, err := storer.Spells(ctx)
 	if err != nil {
 		return err
 	}
@@ -1546,7 +1545,7 @@ func addTargetIdToSpells() error {
 			return err
 		}
 
-		query := "UPDATE d1_static.spells" +
+		query := "UPDATE retro_static.spells" +
 			" SET levels = $2" +
 			" WHERE id = $1;"
 
@@ -1559,7 +1558,7 @@ func addTargetIdToSpells() error {
 	return nil
 }
 
-func encodeSpellLevels(levels []d1typ.SpellLevel) ([]string, error) {
+func encodeSpellLevels(levels []retrotyp.SpellLevel) ([]string, error) {
 	if len(levels) == 0 {
 		return nil, nil
 	}
@@ -1581,7 +1580,7 @@ func encodeSpellLevels(levels []d1typ.SpellLevel) ([]string, error) {
 	return sli, nil
 }
 
-func encodeSpellLevel(level d1typ.SpellLevel) ([]interface{}, error) {
+func encodeSpellLevel(level retrotyp.SpellLevel) ([]interface{}, error) {
 	effects := encodeSpellLevelEffects(level.Effects)
 	effectsCritical := encodeSpellLevelEffects(level.EffectsCritical)
 
@@ -1592,14 +1591,14 @@ func encodeSpellLevel(level d1typ.SpellLevel) ([]interface{}, error) {
 
 	effectZones := make([]string, len(level.Effects)+len(level.EffectsCritical))
 	for i, effect := range level.Effects {
-		size, err := d1proto.Encode64(effect.ZoneSize)
+		size, err := retroproto.Encode64(effect.ZoneSize)
 		if err != nil {
 			return nil, err
 		}
 		effectZones[i] = fmt.Sprintf("%s%s", string(effect.ZoneShape), string(size))
 	}
 	for i, effect := range level.EffectsCritical {
-		size, err := d1proto.Encode64(effect.ZoneSize)
+		size, err := retroproto.Encode64(effect.ZoneSize)
 		if err != nil {
 			return nil, err
 		}
@@ -1616,7 +1615,7 @@ func encodeSpellLevel(level d1typ.SpellLevel) ([]interface{}, error) {
 	return data, nil
 }
 
-func encodeSpellLevelEffects(effects []d1typ.Effect) []interface{} {
+func encodeSpellLevelEffects(effects []retrotyp.Effect) []interface{} {
 	if len(effects) == 0 {
 		return nil
 	}
@@ -1628,7 +1627,7 @@ func encodeSpellLevelEffects(effects []d1typ.Effect) []interface{} {
 	return sli
 }
 
-func encodeSpellLevelEffect(effect d1typ.Effect) []interface{} {
+func encodeSpellLevelEffect(effect retrotyp.Effect) []interface{} {
 	var diceNum *int
 	if effect.DiceNum != -1 {
 		diceNum = &effect.DiceNum

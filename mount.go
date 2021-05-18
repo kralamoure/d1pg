@@ -1,16 +1,16 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) CreateMount(ctx context.Context, mount d1.Mount) (id int, err error) {
-	query := "INSERT INTO d1.mounts (template_id, character_id, name, sex, xp, capacities, validity)" +
+func (r *Storer) CreateMount(ctx context.Context, mount retro.Mount) (id int, err error) {
+	query := "INSERT INTO retro.mounts (template_id, character_id, name, sex, xp, capacities, validity)" +
 		" VALUES ($1, $2, $3, $4, $5, $6, $7)" +
 		" RETURNING id;"
 
@@ -29,7 +29,7 @@ func (r *Repo) CreateMount(ctx context.Context, mount d1.Mount) (id int, err err
 		capacities[i] = int(v)
 	}
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query,
 			mount.TemplateId, characterId, mount.Name, mount.Sex, mount.XP, capacities, validity,
 		).Scan(&id),
@@ -37,8 +37,8 @@ func (r *Repo) CreateMount(ctx context.Context, mount d1.Mount) (id int, err err
 	return
 }
 
-func (r *Repo) UpdateMount(ctx context.Context, mount d1.Mount) error {
-	query := "UPDATE d1.mounts" +
+func (r *Storer) UpdateMount(ctx context.Context, mount retro.Mount) error {
+	query := "UPDATE retro.mounts" +
 		" SET template_id = $2, character_id = $3, name = $4, sex = $5, xp = $6, capacities = $7, validity = $8" +
 		" WHERE id = $1;"
 
@@ -63,14 +63,14 @@ func (r *Repo) UpdateMount(ctx context.Context, mount d1.Mount) error {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *Repo) DeleteMount(ctx context.Context, id int) error {
-	query := "DELETE FROM d1.mounts" +
+func (r *Storer) DeleteMount(ctx context.Context, id int) error {
+	query := "DELETE FROM retro.mounts" +
 		" WHERE id = $1;"
 
 	tag, err := r.pool.Exec(ctx, query, id)
@@ -78,13 +78,13 @@ func (r *Repo) DeleteMount(ctx context.Context, id int) error {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 	return nil
 }
 
-func (r *Repo) Mount(ctx context.Context, id int) (d1.Mount, error) {
-	var mount d1.Mount
+func (r *Storer) Mount(ctx context.Context, id int) (retro.Mount, error) {
+	var mount retro.Mount
 
 	mounts, err := r.mounts(ctx, "id = $1", id)
 	if err != nil {
@@ -92,7 +92,7 @@ func (r *Repo) Mount(ctx context.Context, id int) (d1.Mount, error) {
 	}
 
 	if len(mounts) != 1 {
-		return mount, d1.ErrNotFound
+		return mount, retro.ErrNotFound
 	}
 
 	for k := range mounts {
@@ -102,17 +102,17 @@ func (r *Repo) Mount(ctx context.Context, id int) (d1.Mount, error) {
 	return mount, nil
 }
 
-func (r *Repo) Mounts(ctx context.Context) (items map[int]d1.Mount, err error) {
+func (r *Storer) Mounts(ctx context.Context) (items map[int]retro.Mount, err error) {
 	return r.mounts(ctx, "")
 }
 
-func (r *Repo) MountsByCharacterId(ctx context.Context, characterId int) (items map[int]d1.Mount, err error) {
+func (r *Storer) MountsByCharacterId(ctx context.Context, characterId int) (items map[int]retro.Mount, err error) {
 	return r.mounts(ctx, "character_id = $1", characterId)
 }
 
-func (r *Repo) mounts(ctx context.Context, conditions string, args ...interface{}) (map[int]d1.Mount, error) {
+func (r *Storer) mounts(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.Mount, error) {
 	query := "SELECT id, template_id, character_id, name, sex, xp, capacities, validity" +
-		" FROM d1.mounts"
+		" FROM retro.mounts"
 	if conditions != "" {
 		query += fmt.Sprintf(" WHERE %s", conditions)
 	}
@@ -124,9 +124,9 @@ func (r *Repo) mounts(ctx context.Context, conditions string, args ...interface{
 	}
 	defer rows.Close()
 
-	mounts := make(map[int]d1.Mount)
+	mounts := make(map[int]retro.Mount)
 	for rows.Next() {
-		var mount d1.Mount
+		var mount retro.Mount
 		var characterId *int
 		var validity *time.Time
 		var capacities []int
@@ -145,9 +145,9 @@ func (r *Repo) mounts(ctx context.Context, conditions string, args ...interface{
 			mount.Validity = *validity
 		}
 
-		mount.Capacities = make([]d1typ.MountCapacityId, len(capacities))
+		mount.Capacities = make([]retrotyp.MountCapacityId, len(capacities))
 		for i, v := range capacities {
-			mount.Capacities[i] = d1typ.MountCapacityId(v)
+			mount.Capacities[i] = retrotyp.MountCapacityId(v)
 		}
 
 		mounts[mount.Id] = mount

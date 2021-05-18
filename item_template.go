@@ -1,4 +1,4 @@
-package d1pg
+package retropg
 
 import (
 	"context"
@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) ItemTemplates(ctx context.Context) (templates map[int]d1.ItemTemplate, err error) {
+func (r *Storer) ItemTemplates(ctx context.Context) (templates map[int]retro.ItemTemplate, err error) {
 	query := "SELECT id, name, description, type, enhanceable, two_hands, ethereal, hidden, itemset_id, can_use, can_target, level, gfx, price, weight, cursed, conditions, weapon_effects, effects" +
 		" FROM d1_static.items;"
 
@@ -19,9 +19,9 @@ func (r *Repo) ItemTemplates(ctx context.Context) (templates map[int]d1.ItemTemp
 	}
 	defer rows.Close()
 
-	templates = make(map[int]d1.ItemTemplate)
+	templates = make(map[int]retro.ItemTemplate)
 	for rows.Next() {
-		var t d1.ItemTemplate
+		var t retro.ItemTemplate
 		var itemSetId *int
 		var weaponEffectsStr string
 		var effectsStr string
@@ -78,7 +78,7 @@ func (r *Repo) ItemTemplates(ctx context.Context) (templates map[int]d1.ItemTemp
 		}
 
 		if effectsStr != "" {
-			effects, err2 := d1.DecodeItemEffects(strings.Split(effectsStr, ","))
+			effects, err2 := retro.DecodeItemEffects(strings.Split(effectsStr, ","))
 			if err2 != nil {
 				err = err2
 				return

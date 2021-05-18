@@ -1,18 +1,18 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) Triggers(ctx context.Context) (map[string]d1.Trigger, error) {
+func (r *Storer) Triggers(ctx context.Context) (map[string]retro.Trigger, error) {
 	return r.triggers(ctx, "")
 }
 
-func (r *Repo) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellId int) (d1.Trigger, error) {
-	var trigger d1.Trigger
+func (r *Storer) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellId int) (retro.Trigger, error) {
+	var trigger retro.Trigger
 
 	triggers, err := r.triggers(ctx, "map_id = $1 AND cell_id = $2", gameMapId, cellId)
 	if err != nil {
@@ -20,7 +20,7 @@ func (r *Repo) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellI
 	}
 
 	if len(triggers) != 1 {
-		return trigger, d1.ErrNotFound
+		return trigger, retro.ErrNotFound
 	}
 
 	for k := range triggers {
@@ -30,7 +30,7 @@ func (r *Repo) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellI
 	return trigger, nil
 }
 
-func (r *Repo) triggers(ctx context.Context, conditions string, args ...interface{}) (map[string]d1.Trigger, error) {
+func (r *Storer) triggers(ctx context.Context, conditions string, args ...interface{}) (map[string]retro.Trigger, error) {
 	query := "SELECT id, map_id, cell_id, target_map_id, target_cell_id" +
 		" FROM d1_static.triggers"
 	if conditions != "" {
@@ -44,9 +44,9 @@ func (r *Repo) triggers(ctx context.Context, conditions string, args ...interfac
 	}
 	defer rows.Close()
 
-	triggers := make(map[string]d1.Trigger)
+	triggers := make(map[string]retro.Trigger)
 	for rows.Next() {
-		var trigger d1.Trigger
+		var trigger retro.Trigger
 
 		err = rows.Scan(&trigger.Id, &trigger.GameMapId, &trigger.CellId, &trigger.TargetGameMapId, &trigger.TargetCellId)
 		if err != nil {

@@ -1,15 +1,15 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"strconv"
 	"strings"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) NPCTemplates(ctx context.Context) (templates map[int]d1.NPCTemplate, err error) {
+func (r *Storer) NPCTemplates(ctx context.Context) (templates map[int]retro.NPCTemplate, err error) {
 	query := "SELECT id, name, actions" +
 		" FROM d1_static.npcs;"
 
@@ -19,9 +19,9 @@ func (r *Repo) NPCTemplates(ctx context.Context) (templates map[int]d1.NPCTempla
 	}
 	defer rows.Close()
 
-	templates = make(map[int]d1.NPCTemplate)
+	templates = make(map[int]retro.NPCTemplate)
 	for rows.Next() {
-		var t d1.NPCTemplate
+		var t retro.NPCTemplate
 		var actions string
 		err = rows.Scan(&t.Id, &t.Name, &actions)
 		if err != nil {
@@ -30,14 +30,14 @@ func (r *Repo) NPCTemplates(ctx context.Context) (templates map[int]d1.NPCTempla
 
 		if actions != "" {
 			sli := strings.Split(actions, ",")
-			t.Actions = make([]d1typ.NPCAction, len(sli))
+			t.Actions = make([]retrotyp.NPCAction, len(sli))
 			for i, v := range sli {
 				action, err2 := strconv.Atoi(v)
 				if err2 != nil {
 					err = err2
 					return
 				}
-				t.Actions[i] = d1typ.NPCAction(action)
+				t.Actions[i] = retrotyp.NPCAction(action)
 			}
 		}
 

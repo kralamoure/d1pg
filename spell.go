@@ -1,16 +1,16 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
-	"github.com/kralamoure/d1proto"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
+	"github.com/kralamoure/retroproto"
 )
 
-func (r *Repo) Spells(ctx context.Context) (spells map[int]d1.Spell, err error) {
+func (r *Storer) Spells(ctx context.Context) (spells map[int]retro.Spell, err error) {
 	query := "SELECT id, name, description, levels" +
 		" FROM d1_static.spells;"
 
@@ -20,9 +20,9 @@ func (r *Repo) Spells(ctx context.Context) (spells map[int]d1.Spell, err error) 
 	}
 	defer rows.Close()
 
-	spells = make(map[int]d1.Spell)
+	spells = make(map[int]retro.Spell)
 	for rows.Next() {
-		var spell d1.Spell
+		var spell retro.Spell
 		var levels []string
 
 		err = rows.Scan(&spell.Id, &spell.Name, &spell.Description, &levels)
@@ -44,7 +44,7 @@ func (r *Repo) Spells(ctx context.Context) (spells map[int]d1.Spell, err error) 
 	return
 }
 
-func decodeSpellLevel(s string, grade int) (level d1typ.SpellLevel, err error) {
+func decodeSpellLevel(s string, grade int) (level retrotyp.SpellLevel, err error) {
 	var sli []interface{}
 	err = json.Unmarshal([]byte(s), &sli)
 	if err != nil {
@@ -139,7 +139,7 @@ func decodeSpellLevel(s string, grade int) (level d1typ.SpellLevel, err error) {
 		err = errInvalidAssertion
 		return
 	}
-	level.ClassId = d1typ.ClassId(classId)
+	level.ClassId = retrotyp.ClassId(classId)
 
 	maxCastsPerTurn, ok := sli[12].(float64)
 	if !ok {
@@ -168,13 +168,13 @@ func decodeSpellLevel(s string, grade int) (level d1typ.SpellLevel, err error) {
 		return
 	}
 	if effectZones != "" && len(effectZones)%2 == 0 {
-		shapes := make([]d1typ.EffectZoneShape, len(effectZones)/2)
+		shapes := make([]retrotyp.EffectZoneShape, len(effectZones)/2)
 		sizes := make([]int, len(effectZones)/2)
 		for i := 0; i < len(effectZones)/2; i++ {
-			shape := d1typ.EffectZoneShape(effectZones[i*2])
+			shape := retrotyp.EffectZoneShape(effectZones[i*2])
 
 			sizeR := rune(effectZones[i*2+1])
-			size, err2 := d1proto.Decode64(sizeR)
+			size, err2 := retroproto.Decode64(sizeR)
 			if err2 != nil {
 				err = err2
 				return
@@ -249,14 +249,14 @@ func decodeSpellLevel(s string, grade int) (level d1typ.SpellLevel, err error) {
 	return
 }
 
-func decodeSpellLevelEffects(v interface{}) (effects []d1typ.Effect, err error) {
+func decodeSpellLevelEffects(v interface{}) (effects []retrotyp.Effect, err error) {
 	sli, ok := v.([]interface{})
 	if !ok {
 		err = errInvalidAssertion
 		return
 	}
 
-	effects = make([]d1typ.Effect, len(sli))
+	effects = make([]retrotyp.Effect, len(sli))
 	for i, v := range sli {
 		effectSli, ok := v.([]interface{})
 		if !ok {
@@ -269,7 +269,7 @@ func decodeSpellLevelEffects(v interface{}) (effects []d1typ.Effect, err error) 
 			return
 		}
 
-		var effect d1typ.Effect
+		var effect retrotyp.Effect
 
 		id, ok := effectSli[0].(float64)
 		if !ok {

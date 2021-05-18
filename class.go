@@ -1,14 +1,14 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"encoding/json"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) Classes(ctx context.Context) (classes map[d1typ.ClassId]d1.Class, err error) {
+func (r *Storer) Classes(ctx context.Context) (classes map[retrotyp.ClassId]retro.Class, err error) {
 	query := "SELECT id, name, label, short_description, description, spells, boost_costs" +
 		" FROM d1_static.classes;"
 
@@ -18,9 +18,9 @@ func (r *Repo) Classes(ctx context.Context) (classes map[d1typ.ClassId]d1.Class,
 	}
 	defer rows.Close()
 
-	classes = make(map[d1typ.ClassId]d1.Class)
+	classes = make(map[retrotyp.ClassId]retro.Class)
 	for rows.Next() {
-		var class d1.Class
+		var class retro.Class
 		var boostCostsStr string
 
 		err = rows.Scan(&class.Id, &class.Name, &class.Label, &class.ShortDescription, &class.Description,
@@ -37,10 +37,10 @@ func (r *Repo) Classes(ctx context.Context) (classes map[d1typ.ClassId]d1.Class,
 		}
 
 		for i, v := range boostCosts {
-			characteristic := make([]d1.ClassBoostCost, len(v))
+			characteristic := make([]retro.ClassBoostCost, len(v))
 
 			for i, v := range v {
-				var cost d1.ClassBoostCost
+				var cost retro.ClassBoostCost
 				cost.Quantity = v[0]
 				cost.Cost = v[1]
 				if len(v) >= 3 {

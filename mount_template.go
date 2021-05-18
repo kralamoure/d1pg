@@ -1,18 +1,18 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/kralamoure/d1"
-	"github.com/kralamoure/d1/d1typ"
+	"github.com/kralamoure/retro"
+	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Repo) MountTemplates(ctx context.Context) (map[int]d1.MountTemplate, error) {
+func (r *Storer) MountTemplates(ctx context.Context) (map[int]retro.MountTemplate, error) {
 	return r.mountTemplates(ctx, "")
 }
 
-func (r *Repo) mountTemplates(ctx context.Context, conditions string, args ...interface{}) (map[int]d1.MountTemplate, error) {
+func (r *Storer) mountTemplates(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.MountTemplate, error) {
 	query := "SELECT id, name, gfx_id, color_1, color_2, color_3, max_effects" +
 		" FROM d1_static.mounts"
 	if conditions != "" {
@@ -26,12 +26,12 @@ func (r *Repo) mountTemplates(ctx context.Context, conditions string, args ...in
 	}
 	defer rows.Close()
 
-	mountTemplates := make(map[int]d1.MountTemplate)
+	mountTemplates := make(map[int]retro.MountTemplate)
 	for rows.Next() {
-		var mountTemplate d1.MountTemplate
-		var color1 *d1typ.Color
-		var color2 *d1typ.Color
-		var color3 *d1typ.Color
+		var mountTemplate retro.MountTemplate
+		var color1 *retrotyp.Color
+		var color2 *retrotyp.Color
+		var color3 *retrotyp.Color
 		var maxEffectsSli []string
 
 		err = rows.Scan(&mountTemplate.Id, &mountTemplate.Name, &mountTemplate.GFXId, &color1, &color2, &color3, &maxEffectsSli)
@@ -49,7 +49,7 @@ func (r *Repo) mountTemplates(ctx context.Context, conditions string, args ...in
 			mountTemplate.Color3 = *color3
 		}
 
-		maxEffects, err := d1.DecodeItemEffects(maxEffectsSli)
+		maxEffects, err := retro.DecodeItemEffects(maxEffectsSli)
 		if err != nil {
 			return nil, err
 		}

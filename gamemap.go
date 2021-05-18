@@ -1,12 +1,12 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) GameMaps(ctx context.Context) (gameMaps map[int]d1.GameMap, err error) {
+func (r *Storer) GameMaps(ctx context.Context) (gameMaps map[int]retro.GameMap, err error) {
 	query := "SELECT id, name, width, height, background, ambiance, music, outdoor, capabilities, data, encrypted_data, key" +
 		" FROM d1_static.maps;"
 
@@ -16,9 +16,9 @@ func (r *Repo) GameMaps(ctx context.Context) (gameMaps map[int]d1.GameMap, err e
 	}
 	defer rows.Close()
 
-	gameMaps = make(map[int]d1.GameMap)
+	gameMaps = make(map[int]retro.GameMap)
 	for rows.Next() {
-		var gameMap d1.GameMap
+		var gameMap retro.GameMap
 
 		err = rows.Scan(&gameMap.Id, &gameMap.Name, &gameMap.Width, &gameMap.Height,
 			&gameMap.Background, &gameMap.Ambiance, &gameMap.Music, &gameMap.Outdoor, &gameMap.Capabilities,

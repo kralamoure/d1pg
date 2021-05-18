@@ -1,20 +1,20 @@
-package d1pg
+package retropg
 
 import (
 	"context"
 	"strings"
 
-	"github.com/kralamoure/d1"
+	"github.com/kralamoure/retro"
 )
 
-func (r *Repo) CreateMarketItem(ctx context.Context, item d1.MarketItem) (id int, err error) {
-	query := "INSERT INTO d1.markets_items (template_id, quantity, effects, price, market_id)" +
+func (r *Storer) CreateMarketItem(ctx context.Context, item retro.MarketItem) (id int, err error) {
+	query := "INSERT INTO retro.markets_items (template_id, quantity, effects, price, market_id)" +
 		" VALUES ($1, $2, $3, $4, $5)" +
 		" RETURNING id;"
 
-	effects := d1.EncodeItemEffects(item.Effects)
+	effects := retro.EncodeItemEffects(item.Effects)
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query,
 			item.TemplateId, item.Quantity, strings.Join(effects, ","), item.Price, item.MarketId,
 		).Scan(&id),
@@ -22,8 +22,8 @@ func (r *Repo) CreateMarketItem(ctx context.Context, item d1.MarketItem) (id int
 	return
 }
 
-func (r *Repo) DeleteMarketItem(ctx context.Context, id int) error {
-	query := "DELETE FROM d1.markets_items" +
+func (r *Storer) DeleteMarketItem(ctx context.Context, id int) error {
+	query := "DELETE FROM retro.markets_items" +
 		" WHERE id = $1;"
 
 	tag, err := r.pool.Exec(ctx, query, id)
@@ -31,14 +31,14 @@ func (r *Repo) DeleteMarketItem(ctx context.Context, id int) error {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return d1.ErrNotFound
+		return retro.ErrNotFound
 	}
 	return nil
 }
 
-func (r *Repo) MarketItems(ctx context.Context, gameServerId int) (items map[int]d1.MarketItem, err error) {
+func (r *Storer) MarketItems(ctx context.Context, gameServerId int) (items map[int]retro.MarketItem, err error) {
 	query := "SELECT id, template_id, quantity, effects, price, market_id" +
-		" FROM d1.markets_items" +
+		" FROM retro.markets_items" +
 		" INNER JOIN markets m ON market_id = m.id" +
 		" WHERE m.gameserver_id = $1;"
 
@@ -48,9 +48,9 @@ func (r *Repo) MarketItems(ctx context.Context, gameServerId int) (items map[int
 	}
 	defer rows.Close()
 
-	items = make(map[int]d1.MarketItem)
+	items = make(map[int]retro.MarketItem)
 	for rows.Next() {
-		var item d1.MarketItem
+		var item retro.MarketItem
 		var effectsStr string
 
 		err = rows.Scan(&item.Id, &item.TemplateId, &item.Quantity, &effectsStr, &item.Price, &item.MarketId)
@@ -59,7 +59,7 @@ func (r *Repo) MarketItems(ctx context.Context, gameServerId int) (items map[int
 		}
 
 		if effectsStr != "" {
-			effects, err2 := d1.DecodeItemEffects(strings.Split(effectsStr, ","))
+			effects, err2 := retro.DecodeItemEffects(strings.Split(effectsStr, ","))
 			if err2 != nil {
 				err = err2
 				return
@@ -73,9 +73,9 @@ func (r *Repo) MarketItems(ctx context.Context, gameServerId int) (items map[int
 	return
 }
 
-func (r *Repo) MarketItemsByMarketId(ctx context.Context, marketId string) (items map[int]d1.MarketItem, err error) {
+func (r *Storer) MarketItemsByMarketId(ctx context.Context, marketId string) (items map[int]retro.MarketItem, err error) {
 	query := "SELECT id, template_id, quantity, effects, price, market_id" +
-		" FROM d1.markets_items" +
+		" FROM retro.markets_items" +
 		" WHERE market_id = $1;"
 
 	rows, err := r.pool.Query(ctx, query, marketId)
@@ -84,9 +84,9 @@ func (r *Repo) MarketItemsByMarketId(ctx context.Context, marketId string) (item
 	}
 	defer rows.Close()
 
-	items = make(map[int]d1.MarketItem)
+	items = make(map[int]retro.MarketItem)
 	for rows.Next() {
-		var item d1.MarketItem
+		var item retro.MarketItem
 		var effectsStr string
 
 		err = rows.Scan(&item.Id, &item.TemplateId, &item.Quantity, &effectsStr, &item.Price, &item.MarketId)
@@ -95,7 +95,7 @@ func (r *Repo) MarketItemsByMarketId(ctx context.Context, marketId string) (item
 		}
 
 		if effectsStr != "" {
-			effects, err2 := d1.DecodeItemEffects(strings.Split(effectsStr, ","))
+			effects, err2 := retro.DecodeItemEffects(strings.Split(effectsStr, ","))
 			if err2 != nil {
 				err = err2
 				return
@@ -109,14 +109,14 @@ func (r *Repo) MarketItemsByMarketId(ctx context.Context, marketId string) (item
 	return
 }
 
-func (r *Repo) MarketItem(ctx context.Context, id int) (item d1.MarketItem, err error) {
+func (r *Storer) MarketItem(ctx context.Context, id int) (item retro.MarketItem, err error) {
 	query := "SELECT id, template_id, quantity, effects, price, market_id" +
-		" FROM d1.markets_items" +
+		" FROM retro.markets_items" +
 		" WHERE market_id = $1;"
 
 	var effectsStr string
 
-	err = repoError(
+	err = storerError(
 		r.pool.QueryRow(ctx, query, id).Scan(&item.Id, &item.TemplateId, &item.Quantity, &effectsStr, &item.Price, &item.MarketId),
 	)
 	if err != nil {
@@ -124,7 +124,7 @@ func (r *Repo) MarketItem(ctx context.Context, id int) (item d1.MarketItem, err 
 	}
 
 	if effectsStr != "" {
-		effects, err2 := d1.DecodeItemEffects(strings.Split(effectsStr, ","))
+		effects, err2 := retro.DecodeItemEffects(strings.Split(effectsStr, ","))
 		if err2 != nil {
 			err = err2
 			return
