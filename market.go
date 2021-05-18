@@ -9,7 +9,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) Markets(ctx context.Context, gameServerId int) (markets map[string]retro.Market, err error) {
+func (r *Db) Markets(ctx context.Context, gameServerId int) (markets map[string]retro.Market, err error) {
 	query := "SELECT id, gameserver_id, quantity_1, quantity_2, quantity_3, types, fee, max_level, max_per_account, max_hours" +
 		" FROM retro.markets" +
 		" WHERE gameserver_id = $1;"

@@ -8,11 +8,11 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) MountTemplates(ctx context.Context) (map[int]retro.MountTemplate, error) {
+func (r *Db) MountTemplates(ctx context.Context) (map[int]retro.MountTemplate, error) {
 	return r.mountTemplates(ctx, "")
 }
 
-func (r *Storer) mountTemplates(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.MountTemplate, error) {
+func (r *Db) mountTemplates(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.MountTemplate, error) {
 	query := "SELECT id, name, gfx_id, color_1, color_2, color_3, max_effects" +
 		" FROM d1_static.mounts"
 	if conditions != "" {

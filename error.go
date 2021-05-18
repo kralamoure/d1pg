@@ -15,7 +15,7 @@ const (
 
 type errCode string
 
-func storerError(err error) error {
+func dbError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -33,17 +33,17 @@ func storerError(err error) error {
 		return err
 	}
 
-	var storerErr error
+	var dbErr error
 	switch pgErr.ConstraintName {
 	case "gameservers_host_port_key":
-		storerErr = retro.ErrGameServerHostAndPortAlreadyExist
+		dbErr = retro.ErrGameServerHostAndPortAlreadyExist
 	case "characters_name_gameserver_id_key":
-		storerErr = retro.ErrCharacterNameAndGameServerIdAlreadyExist
+		dbErr = retro.ErrCharacterNameAndGameServerIdAlreadyExist
 	case "tickets_account_id_key":
-		storerErr = retro.ErrTicketAccountIdAlreadyExists
+		dbErr = retro.ErrTicketAccountIdAlreadyExists
 	default:
-		storerErr = retro.ErrAlreadyExists
+		dbErr = retro.ErrAlreadyExists
 	}
 
-	return fmt.Errorf("%w: %s", storerErr, err)
+	return fmt.Errorf("%w: %s", dbErr, err)
 }

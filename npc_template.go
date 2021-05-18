@@ -9,7 +9,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) NPCTemplates(ctx context.Context) (templates map[int]retro.NPCTemplate, err error) {
+func (r *Db) NPCTemplates(ctx context.Context) (templates map[int]retro.NPCTemplate, err error) {
 	query := "SELECT id, name, actions" +
 		" FROM d1_static.npcs;"
 

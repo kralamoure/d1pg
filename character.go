@@ -11,7 +11,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) CreateCharacter(ctx context.Context, character retro.Character) (id int, err error) {
+func (r *Db) CreateCharacter(ctx context.Context, character retro.Character) (id int, err error) {
 	query := "INSERT INTO retro.characters (account_id, gameserver_id, name, sex, class_id, color_1, color_2, color_3, alignment, alignment_enabled, xp, kamas, bonus_points, bonus_points_spell, honor, disgrace, stats, map_id, cell, direction, spells, mount_id, mounting)" +
 		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)" +
 		" RETURNING id;"
@@ -48,7 +48,7 @@ func (r *Storer) CreateCharacter(ctx context.Context, character retro.Character)
 		mountId = &character.MountId
 	}
 
-	err = storerError(
+	err = dbError(
 		r.pool.QueryRow(ctx, query,
 			character.AccountId, character.GameServerId, character.Name, character.Sex, character.ClassId,
 			color1, color2, color3, character.Alignment, character.AlignmentEnabled, character.XP, character.Kamas,
@@ -59,7 +59,7 @@ func (r *Storer) CreateCharacter(ctx context.Context, character retro.Character)
 	return
 }
 
-func (r *Storer) UpdateCharacter(ctx context.Context, character retro.Character) error {
+func (r *Db) UpdateCharacter(ctx context.Context, character retro.Character) error {
 	query := "UPDATE retro.characters" +
 		" SET account_id = $2, gameserver_id = $3, name = $4, sex = $5, class_id = $6, color_1 = $7, color_2 = $8, color_3 = $9, alignment = $10, alignment_enabled = $11, xp = $12, kamas = $13, bonus_points = $14, bonus_points_spell = $15, honor = $16, disgrace = $17, stats = $18, map_id = $19, cell = $20, direction = $21, spells = $22, mount_id = $23, mounting = $24" +
 		" WHERE id = $1;"
@@ -111,7 +111,7 @@ func (r *Storer) UpdateCharacter(ctx context.Context, character retro.Character)
 	return nil
 }
 
-func (r *Storer) DeleteCharacter(ctx context.Context, id int) error {
+func (r *Db) DeleteCharacter(ctx context.Context, id int) error {
 	query := "DELETE FROM retro.characters" +
 		" WHERE id = $1;"
 
@@ -125,27 +125,27 @@ func (r *Storer) DeleteCharacter(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *Storer) AllCharacters(ctx context.Context) (map[int]retro.Character, error) {
+func (r *Db) AllCharacters(ctx context.Context) (map[int]retro.Character, error) {
 	return r.characters(ctx, "")
 }
 
-func (r *Storer) AllCharactersByAccountId(ctx context.Context, accountId string) (map[int]retro.Character, error) {
+func (r *Db) AllCharactersByAccountId(ctx context.Context, accountId string) (map[int]retro.Character, error) {
 	return r.characters(ctx, "account_id = $1;", accountId)
 }
 
-func (r *Storer) Characters(ctx context.Context, gameServerId int) (map[int]retro.Character, error) {
+func (r *Db) Characters(ctx context.Context, gameServerId int) (map[int]retro.Character, error) {
 	return r.characters(ctx, "gameserver_id = $1", gameServerId)
 }
 
-func (r *Storer) CharactersByAccountId(ctx context.Context, gameServerId int, accountId string) (map[int]retro.Character, error) {
+func (r *Db) CharactersByAccountId(ctx context.Context, gameServerId int, accountId string) (map[int]retro.Character, error) {
 	return r.characters(ctx, "gameserver_id = $1 AND account_id = $2", gameServerId, accountId)
 }
 
-func (r *Storer) CharactersByGameMapId(ctx context.Context, gameServerId int, gameMapId int) (map[int]retro.Character, error) {
+func (r *Db) CharactersByGameMapId(ctx context.Context, gameServerId int, gameMapId int) (map[int]retro.Character, error) {
 	return r.characters(ctx, "gameserver_id = $1 AND map_id = $2", gameServerId, gameMapId)
 }
 
-func (r *Storer) Character(ctx context.Context, id int) (retro.Character, error) {
+func (r *Db) Character(ctx context.Context, id int) (retro.Character, error) {
 	var char retro.Character
 
 	chars, err := r.characters(ctx, "id = $1", id)
@@ -164,7 +164,7 @@ func (r *Storer) Character(ctx context.Context, id int) (retro.Character, error)
 	return char, nil
 }
 
-func (r *Storer) characters(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.Character, error) {
+func (r *Db) characters(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.Character, error) {
 	query := "SELECT id, account_id, gameserver_id, name, sex, class_id, color_1, color_2, color_3, alignment, alignment_enabled, xp, kamas, bonus_points, bonus_points_spell, honor, disgrace, stats, map_id, cell, direction, spells, mount_id, mounting" +
 		" FROM retro.characters"
 	if conditions != "" {

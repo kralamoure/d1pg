@@ -6,7 +6,7 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) NPCs(ctx context.Context, gameServerId int) (npcs map[string]retro.NPC, err error) {
+func (r *Db) NPCs(ctx context.Context, gameServerId int) (npcs map[string]retro.NPC, err error) {
 	query := "SELECT id, gameserver_id, map_id, cell_id, direction, template_id, sex, gfx, scale_x, scale_y, color_1, color_2, color_3, accessories, extra_clip, custom_artwork, dialog_id, market_id" +
 		" FROM retro.npcs" +
 		" WHERE gameserver_id = $1;"

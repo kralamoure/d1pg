@@ -6,7 +6,7 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) EffectTemplates(ctx context.Context) (templates map[int]retro.EffectTemplate, err error) {
+func (r *Db) EffectTemplates(ctx context.Context) (templates map[int]retro.EffectTemplate, err error) {
 	query := "SELECT id, description, dice, operator, characteristic_id, element" +
 		" FROM d1_static.effects;"
 

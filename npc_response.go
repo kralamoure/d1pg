@@ -6,7 +6,7 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) NPCResponses(ctx context.Context) (responses map[int]retro.NPCResponse, err error) {
+func (r *Db) NPCResponses(ctx context.Context) (responses map[int]retro.NPCResponse, err error) {
 	query := "SELECT id, text, action, arguments, conditions" +
 		" FROM d1_static.npc_responses;"
 

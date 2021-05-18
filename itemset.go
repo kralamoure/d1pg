@@ -10,7 +10,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) ItemSets(ctx context.Context) (itemSets map[int]retro.ItemSet, err error) {
+func (r *Db) ItemSets(ctx context.Context) (itemSets map[int]retro.ItemSet, err error) {
 	query := "SELECT id, name, bonus" +
 		" FROM d1_static.itemsets;"
 

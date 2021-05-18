@@ -6,7 +6,7 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) GameMaps(ctx context.Context) (gameMaps map[int]retro.GameMap, err error) {
+func (r *Db) GameMaps(ctx context.Context) (gameMaps map[int]retro.GameMap, err error) {
 	query := "SELECT id, name, width, height, background, ambiance, music, outdoor, capabilities, data, encrypted_data, key" +
 		" FROM d1_static.maps;"
 

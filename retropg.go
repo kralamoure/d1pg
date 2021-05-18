@@ -16,16 +16,16 @@ var defaultTxOptions = pgx.TxOptions{
 
 var errInvalidAssertion = errors.New("invalid assertion")
 
-type Storer struct {
+type Db struct {
 	pool *pgxpool.Pool
 }
 
-func NewStorer(pool *pgxpool.Pool) (*Storer, error) {
+func NewDb(pool *pgxpool.Pool) (*Db, error) {
 	if pool == nil {
 		return nil, errors.New("pool is nil")
 	}
 
-	login := &Storer{pool: pool}
+	login := &Db{pool: pool}
 
 	return login, nil
 }

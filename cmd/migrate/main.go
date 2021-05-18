@@ -25,9 +25,9 @@ import (
 var errInvalidAssertion = errors.New("invalid assertion")
 
 var (
-	ctx    = context.Background()
-	pool   *pgxpool.Pool
-	storer *retropg.Storer
+	ctx  = context.Background()
+	pool *pgxpool.Pool
+	db   *retropg.Db
 )
 
 type ItemTemplate struct {
@@ -113,7 +113,7 @@ func run() error {
 	pool = tmp
 	defer pool.Close()
 
-	storer, err = retropg.NewStorer(pool)
+	db, err = retropg.NewDb(pool)
 	if err != nil {
 		return err
 	}
@@ -336,7 +336,7 @@ func createSystemMarketWeaponElements() error {
 		if i == 1 {
 			marketId = etherealMarketId
 		}
-		marketItems, err := storer.MarketItemsByMarketId(ctx, marketId)
+		marketItems, err := db.MarketItemsByMarketId(ctx, marketId)
 		if err != nil {
 			return err
 		}
@@ -382,7 +382,7 @@ func createSystemMarketWeaponElements() error {
 					}
 
 					if changed {
-						_, err := storer.CreateMarketItem(ctx, retro.MarketItem{
+						_, err := db.CreateMarketItem(ctx, retro.MarketItem{
 							Item: retro.Item{
 								TemplateId: v.TemplateId,
 								Quantity:   1,
@@ -410,7 +410,7 @@ func createSystemMarketItems() error {
 	effectIdsToRemove := []int{205, 208, 209, 601, 740, 785, 983, 800, 806, 807, 808, 811}
 	disallowedItemIds := []int{9031, 9202, 9919, 9396, 6894, 6895, 7913, 7920, 2154, 2155, 2156, 6713, 8575, 8854, 10076, 10073, 9627, 2170, 8627, 1505, 6971, 6975, 8574, 7043, 7112, 8098, 10125, 10126, 10127, 10133, 1944, 1628, 1629, 1630, 1631, 1632, 1633, 684, 1710, 958, 1099, 10846, 10677, 9641, 9635, 9472, 8952, 8949, 992, 991, 990, 989, 7865, 7864, 7809, 7807, 7806}
 
-	markets, err := storer.Markets(ctx, gameServerId)
+	markets, err := db.Markets(ctx, gameServerId)
 	if err != nil {
 		return err
 	}
@@ -423,13 +423,13 @@ func createSystemMarketItems() error {
 		return errors.New("ethereal market not found")
 	}
 
-	effectTemplates, err := storer.EffectTemplates(ctx)
+	effectTemplates, err := db.EffectTemplates(ctx)
 	if err != nil {
 		return err
 	}
 
 	for i := 0; i < 2; i++ {
-		itemTemplates, err := storer.ItemTemplates(ctx)
+		itemTemplates, err := db.ItemTemplates(ctx)
 		if err != nil {
 			return err
 		}
@@ -790,7 +790,7 @@ func createSystemMarketItems() error {
 		}
 
 		for _, item := range items {
-			_, err := storer.CreateMarketItem(ctx, item)
+			_, err := db.CreateMarketItem(ctx, item)
 			if err != nil {
 				return err
 			}
@@ -887,7 +887,7 @@ func createNPCDialogsAndResponses() error {
 }
 
 func decryptGameMapData() error {
-	gameMaps, err := storer.GameMaps(ctx)
+	gameMaps, err := db.GameMaps(ctx)
 	if err != nil {
 		return err
 	}
@@ -912,7 +912,7 @@ func decryptGameMapData() error {
 }
 
 func orderItemTemplateEffects() error {
-	itemTemplates, err := storer.ItemTemplates(ctx)
+	itemTemplates, err := db.ItemTemplates(ctx)
 	if err != nil {
 		return err
 	}
@@ -1081,7 +1081,7 @@ func orderItemTemplateEffects() error {
 }
 
 func orderItemSetEffects() error {
-	itemSets, err := storer.ItemSets(ctx)
+	itemSets, err := db.ItemSets(ctx)
 	if err != nil {
 		return err
 	}
@@ -1468,7 +1468,7 @@ func addTargetIdToSpells() error {
 		})
 	}
 
-	spells, err := storer.Spells(ctx)
+	spells, err := db.Spells(ctx)
 	if err != nil {
 		return err
 	}

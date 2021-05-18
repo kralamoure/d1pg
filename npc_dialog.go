@@ -6,7 +6,7 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) NPCDialogs(ctx context.Context) (dialogs map[int]retro.NPCDialog, err error) {
+func (r *Db) NPCDialogs(ctx context.Context) (dialogs map[int]retro.NPCDialog, err error) {
 	query := "SELECT id, text, responses" +
 		" FROM d1_static.npc_dialogs;"
 

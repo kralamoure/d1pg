@@ -7,14 +7,14 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) CreateTicket(ctx context.Context, ticket retro.Ticket) (id string, err error) {
+func (r *Db) CreateTicket(ctx context.Context, ticket retro.Ticket) (id string, err error) {
 	query := "INSERT INTO retro.tickets (account_id, gameserver_id)" +
 		" VALUES ($1, $2)" +
 		" ON CONFLICT (account_id) DO UPDATE" +
 		" SET id = DEFAULT, gameserver_id = EXCLUDED.gameserver_id, created = DEFAULT" +
 		" RETURNING id;"
 
-	err = storerError(
+	err = dbError(
 		r.pool.QueryRow(ctx, query,
 			ticket.AccountId, ticket.GameServerId).
 			Scan(&id),
@@ -22,7 +22,7 @@ func (r *Storer) CreateTicket(ctx context.Context, ticket retro.Ticket) (id stri
 	return
 }
 
-func (r *Storer) DeleteTickets(ctx context.Context, before time.Time) (count int, err error) {
+func (r *Db) DeleteTickets(ctx context.Context, before time.Time) (count int, err error) {
 	query := "DELETE FROM retro.tickets" +
 		" WHERE created <= $1;"
 
@@ -34,19 +34,19 @@ func (r *Storer) DeleteTickets(ctx context.Context, before time.Time) (count int
 	return
 }
 
-func (r *Storer) UseTicket(ctx context.Context, id string) (ticket retro.Ticket, err error) {
+func (r *Db) UseTicket(ctx context.Context, id string) (ticket retro.Ticket, err error) {
 	query := "DELETE FROM retro.tickets" +
 		" WHERE id = $1" +
 		" RETURNING id, account_id, gameserver_id, created;"
 
-	err = storerError(
+	err = dbError(
 		r.pool.QueryRow(ctx, query, id).
 			Scan(&ticket.Id, &ticket.AccountId, &ticket.GameServerId, &ticket.Created),
 	)
 	return
 }
 
-func (r *Storer) Tickets(ctx context.Context) (tickets map[string]retro.Ticket, err error) {
+func (r *Db) Tickets(ctx context.Context) (tickets map[string]retro.Ticket, err error) {
 	query := "SELECT id, account_id, gameserver_id, created" +
 		" FROM retro.tickets;"
 
@@ -68,12 +68,12 @@ func (r *Storer) Tickets(ctx context.Context) (tickets map[string]retro.Ticket, 
 	return
 }
 
-func (r *Storer) Ticket(ctx context.Context, id string) (ticket retro.Ticket, err error) {
+func (r *Db) Ticket(ctx context.Context, id string) (ticket retro.Ticket, err error) {
 	query := "SELECT id, account_id, gameserver_id, created" +
 		" FROM retro.tickets" +
 		" WHERE id = $1;"
 
-	err = storerError(
+	err = dbError(
 		r.pool.QueryRow(ctx, query, id).
 			Scan(&ticket.Id, &ticket.AccountId, &ticket.GameServerId, &ticket.Created),
 	)

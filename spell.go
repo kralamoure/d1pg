@@ -10,7 +10,7 @@ import (
 	"github.com/kralamoure/retroproto"
 )
 
-func (r *Storer) Spells(ctx context.Context) (spells map[int]retro.Spell, err error) {
+func (r *Db) Spells(ctx context.Context) (spells map[int]retro.Spell, err error) {
 	query := "SELECT id, name, description, levels" +
 		" FROM d1_static.spells;"
 

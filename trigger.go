@@ -7,11 +7,11 @@ import (
 	"github.com/kralamoure/retro"
 )
 
-func (r *Storer) Triggers(ctx context.Context) (map[string]retro.Trigger, error) {
+func (r *Db) Triggers(ctx context.Context) (map[string]retro.Trigger, error) {
 	return r.triggers(ctx, "")
 }
 
-func (r *Storer) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellId int) (retro.Trigger, error) {
+func (r *Db) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellId int) (retro.Trigger, error) {
 	var trigger retro.Trigger
 
 	triggers, err := r.triggers(ctx, "map_id = $1 AND cell_id = $2", gameMapId, cellId)
@@ -30,7 +30,7 @@ func (r *Storer) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cel
 	return trigger, nil
 }
 
-func (r *Storer) triggers(ctx context.Context, conditions string, args ...interface{}) (map[string]retro.Trigger, error) {
+func (r *Db) triggers(ctx context.Context, conditions string, args ...interface{}) (map[string]retro.Trigger, error) {
 	query := "SELECT id, map_id, cell_id, target_map_id, target_cell_id" +
 		" FROM d1_static.triggers"
 	if conditions != "" {

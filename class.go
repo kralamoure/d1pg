@@ -8,7 +8,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) Classes(ctx context.Context) (classes map[retrotyp.ClassId]retro.Class, err error) {
+func (r *Db) Classes(ctx context.Context) (classes map[retrotyp.ClassId]retro.Class, err error) {
 	query := "SELECT id, name, label, short_description, description, spells, boost_costs" +
 		" FROM d1_static.classes;"
 

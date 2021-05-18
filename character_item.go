@@ -9,7 +9,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) CreateCharacterItem(ctx context.Context, item retro.CharacterItem) (id int, err error) {
+func (r *Db) CreateCharacterItem(ctx context.Context, item retro.CharacterItem) (id int, err error) {
 	query := "INSERT INTO retro.characters_items (template_id, quantity, effects, position, character_id)" +
 		" VALUES ($1, $2, $3, $4, $5)" +
 		" RETURNING id;"
@@ -21,7 +21,7 @@ func (r *Storer) CreateCharacterItem(ctx context.Context, item retro.CharacterIt
 		position = &item.Position
 	}
 
-	err = storerError(
+	err = dbError(
 		r.pool.QueryRow(ctx, query,
 			item.TemplateId, item.Quantity, strings.Join(effects, ","), position, item.CharacterId,
 		).Scan(&id),
@@ -29,7 +29,7 @@ func (r *Storer) CreateCharacterItem(ctx context.Context, item retro.CharacterIt
 	return
 }
 
-func (r *Storer) UpdateCharacterItem(ctx context.Context, item retro.CharacterItem) error {
+func (r *Db) UpdateCharacterItem(ctx context.Context, item retro.CharacterItem) error {
 	query := "UPDATE retro.characters_items" +
 		" SET template_id = $2, quantity = $3, effects = $4, position = $5, character_id = $6" +
 		" WHERE id = $1;"
@@ -53,7 +53,7 @@ func (r *Storer) UpdateCharacterItem(ctx context.Context, item retro.CharacterIt
 	return nil
 }
 
-func (r *Storer) DeleteCharacterItem(ctx context.Context, id int) error {
+func (r *Db) DeleteCharacterItem(ctx context.Context, id int) error {
 	query := "DELETE FROM retro.characters_items" +
 		" WHERE id = $1;"
 
@@ -67,11 +67,11 @@ func (r *Storer) DeleteCharacterItem(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *Storer) CharacterItemsByCharacterId(ctx context.Context, characterId int) (items map[int]retro.CharacterItem, err error) {
+func (r *Db) CharacterItemsByCharacterId(ctx context.Context, characterId int) (items map[int]retro.CharacterItem, err error) {
 	return r.characterItems(ctx, "character_id = $1", characterId)
 }
 
-func (r *Storer) CharacterItem(ctx context.Context, id int) (retro.CharacterItem, error) {
+func (r *Db) CharacterItem(ctx context.Context, id int) (retro.CharacterItem, error) {
 	var item retro.CharacterItem
 
 	items, err := r.characterItems(ctx, "id = $1", id)
@@ -90,7 +90,7 @@ func (r *Storer) CharacterItem(ctx context.Context, id int) (retro.CharacterItem
 	return item, nil
 }
 
-func (r *Storer) characterItems(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.CharacterItem, error) {
+func (r *Db) characterItems(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.CharacterItem, error) {
 	query := "SELECT id, template_id, quantity, effects, position, character_id" +
 		" FROM retro.characters_items"
 	if conditions != "" {

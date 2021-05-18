@@ -9,7 +9,7 @@ import (
 	"github.com/kralamoure/retro/retrotyp"
 )
 
-func (r *Storer) CreateMount(ctx context.Context, mount retro.Mount) (id int, err error) {
+func (r *Db) CreateMount(ctx context.Context, mount retro.Mount) (id int, err error) {
 	query := "INSERT INTO retro.mounts (template_id, character_id, name, sex, xp, capacities, validity)" +
 		" VALUES ($1, $2, $3, $4, $5, $6, $7)" +
 		" RETURNING id;"
@@ -29,7 +29,7 @@ func (r *Storer) CreateMount(ctx context.Context, mount retro.Mount) (id int, er
 		capacities[i] = int(v)
 	}
 
-	err = storerError(
+	err = dbError(
 		r.pool.QueryRow(ctx, query,
 			mount.TemplateId, characterId, mount.Name, mount.Sex, mount.XP, capacities, validity,
 		).Scan(&id),
@@ -37,7 +37,7 @@ func (r *Storer) CreateMount(ctx context.Context, mount retro.Mount) (id int, er
 	return
 }
 
-func (r *Storer) UpdateMount(ctx context.Context, mount retro.Mount) error {
+func (r *Db) UpdateMount(ctx context.Context, mount retro.Mount) error {
 	query := "UPDATE retro.mounts" +
 		" SET template_id = $2, character_id = $3, name = $4, sex = $5, xp = $6, capacities = $7, validity = $8" +
 		" WHERE id = $1;"
@@ -69,7 +69,7 @@ func (r *Storer) UpdateMount(ctx context.Context, mount retro.Mount) error {
 	return nil
 }
 
-func (r *Storer) DeleteMount(ctx context.Context, id int) error {
+func (r *Db) DeleteMount(ctx context.Context, id int) error {
 	query := "DELETE FROM retro.mounts" +
 		" WHERE id = $1;"
 
@@ -83,7 +83,7 @@ func (r *Storer) DeleteMount(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *Storer) Mount(ctx context.Context, id int) (retro.Mount, error) {
+func (r *Db) Mount(ctx context.Context, id int) (retro.Mount, error) {
 	var mount retro.Mount
 
 	mounts, err := r.mounts(ctx, "id = $1", id)
@@ -102,15 +102,15 @@ func (r *Storer) Mount(ctx context.Context, id int) (retro.Mount, error) {
 	return mount, nil
 }
 
-func (r *Storer) Mounts(ctx context.Context) (items map[int]retro.Mount, err error) {
+func (r *Db) Mounts(ctx context.Context) (items map[int]retro.Mount, err error) {
 	return r.mounts(ctx, "")
 }
 
-func (r *Storer) MountsByCharacterId(ctx context.Context, characterId int) (items map[int]retro.Mount, err error) {
+func (r *Db) MountsByCharacterId(ctx context.Context, characterId int) (items map[int]retro.Mount, err error) {
 	return r.mounts(ctx, "character_id = $1", characterId)
 }
 
-func (r *Storer) mounts(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.Mount, error) {
+func (r *Db) mounts(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.Mount, error) {
 	query := "SELECT id, template_id, character_id, name, sex, xp, capacities, validity" +
 		" FROM retro.mounts"
 	if conditions != "" {
