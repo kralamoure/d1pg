@@ -8,7 +8,7 @@ import (
 
 func (r *Db) EffectTemplates(ctx context.Context) (templates map[int]retro.EffectTemplate, err error) {
 	query := "SELECT id, description, dice, operator, characteristic_id, element" +
-		" FROM d1_static.effects;"
+		" FROM retro_static.effects;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

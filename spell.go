@@ -12,7 +12,7 @@ import (
 
 func (r *Db) Spells(ctx context.Context) (spells map[int]retro.Spell, err error) {
 	query := "SELECT id, name, description, levels" +
-		" FROM d1_static.spells;"
+		" FROM retro_static.spells;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

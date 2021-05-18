@@ -32,7 +32,7 @@ func (r *Db) TriggerByGameMapIdAndCellId(ctx context.Context, gameMapId, cellId 
 
 func (r *Db) triggers(ctx context.Context, conditions string, args ...interface{}) (map[string]retro.Trigger, error) {
 	query := "SELECT id, map_id, cell_id, target_map_id, target_cell_id" +
-		" FROM d1_static.triggers"
+		" FROM retro_static.triggers"
 	if conditions != "" {
 		query += fmt.Sprintf(" WHERE %s", conditions)
 	}

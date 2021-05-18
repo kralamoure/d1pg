@@ -11,7 +11,7 @@ import (
 
 func (r *Db) NPCTemplates(ctx context.Context) (templates map[int]retro.NPCTemplate, err error) {
 	query := "SELECT id, name, actions" +
-		" FROM d1_static.npcs;"
+		" FROM retro_static.npcs;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 
 func (r *Db) Classes(ctx context.Context) (classes map[retrotyp.ClassId]retro.Class, err error) {
 	query := "SELECT id, name, label, short_description, description, spells, boost_costs" +
-		" FROM d1_static.classes;"
+		" FROM retro_static.classes;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

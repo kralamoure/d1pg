@@ -12,7 +12,7 @@ import (
 
 func (r *Db) ItemSets(ctx context.Context) (itemSets map[int]retro.ItemSet, err error) {
 	query := "SELECT id, name, bonus" +
-		" FROM d1_static.itemsets;"
+		" FROM retro_static.itemsets;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

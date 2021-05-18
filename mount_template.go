@@ -14,7 +14,7 @@ func (r *Db) MountTemplates(ctx context.Context) (map[int]retro.MountTemplate, e
 
 func (r *Db) mountTemplates(ctx context.Context, conditions string, args ...interface{}) (map[int]retro.MountTemplate, error) {
 	query := "SELECT id, name, gfx_id, color_1, color_2, color_3, max_effects" +
-		" FROM d1_static.mounts"
+		" FROM retro_static.mounts"
 	if conditions != "" {
 		query += fmt.Sprintf(" WHERE %s", conditions)
 	}

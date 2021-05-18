@@ -8,7 +8,7 @@ import (
 
 func (r *Db) NPCResponses(ctx context.Context) (responses map[int]retro.NPCResponse, err error) {
 	query := "SELECT id, text, action, arguments, conditions" +
-		" FROM d1_static.npc_responses;"
+		" FROM retro_static.npc_responses;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

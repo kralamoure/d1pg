@@ -8,7 +8,7 @@ import (
 
 func (r *Db) NPCDialogs(ctx context.Context) (dialogs map[int]retro.NPCDialog, err error) {
 	query := "SELECT id, text, responses" +
-		" FROM d1_static.npc_dialogs;"
+		" FROM retro_static.npc_dialogs;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

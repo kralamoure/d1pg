@@ -8,7 +8,7 @@ import (
 
 func (r *Db) GameMaps(ctx context.Context) (gameMaps map[int]retro.GameMap, err error) {
 	query := "SELECT id, name, width, height, background, ambiance, music, outdoor, capabilities, data, encrypted_data, key" +
-		" FROM d1_static.maps;"
+		" FROM retro_static.maps;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 
 func (r *Db) ItemTemplates(ctx context.Context) (templates map[int]retro.ItemTemplate, err error) {
 	query := "SELECT id, name, description, type, enhanceable, two_hands, ethereal, hidden, itemset_id, can_use, can_target, level, gfx, price, weight, cursed, conditions, weapon_effects, effects" +
-		" FROM d1_static.items;"
+		" FROM retro_static.items;"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
