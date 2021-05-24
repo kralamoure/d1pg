@@ -1,7 +1,6 @@
 # retropg
 
-`retropg` is a library that implements [retro.Storer](https://github.com/kralamoure/retro) interface for a PostgreSQL
-database.
+`retropg` is a PostgreSQL database implementation of the [retro.Storer](https://github.com/kralamoure/retro) interface.
 
 ## Requirements
 

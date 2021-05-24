@@ -1,4 +1,5 @@
-// Package retropg is a library that implements retro.Storer interface (https://github.com/kralamoure/retro) for a PostgreSQL database.
+// Package retropg is a PostgreSQL database implementation of the retro.Storer
+// interface (https://github.com/kralamoure/retro).
 package retropg
 
 import (
