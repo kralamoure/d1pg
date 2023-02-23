@@ -11,6 +11,5 @@ require (
 	github.com/kralamoure/retroproto v0.0.0-20210518145930-3b4548159c85
 	github.com/kralamoure/retroutil v0.0.0-20210518132922-a957c67f4004
 	github.com/lib/pq v1.7.0 // indirect
-	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/text v0.3.8 // indirect
 )
